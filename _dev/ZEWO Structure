@@ -4,6 +4,8 @@ $zewo->init( path|array )
 
 $zewo->load( path|pattern|array )
 
+$zewo->run()
+
 ROUTING methods
 
 $zewo->route->get( path, (...middlewares...), callable )
@@ -11,6 +13,8 @@ $zewo->route->get( path, (...middlewares...), callable )
 $zewo->route->post( path, (...middlewares...), callable )
 
 $zewo->route->map( path, (...middlewares...), callable ) // GET and/or POST
+
+$zewo->route->ajax( path, method, (...middlewares...), callable );
 
 $zewo->route->error( code, (...middlewares...), callable )
 
