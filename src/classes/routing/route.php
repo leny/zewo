@@ -5,6 +5,12 @@
 
 namespace Zewo\Routing;
 
+// TODO : matching params in route
+// TODO : passing params to callbacks
+// TODO : matching optional params in route
+// TODO : matching * in route
+// TODO : matching AJAX
+
 class Route {
 
 	public function __construct( $sPattern, $aMethods, $aCallbacks, $bIsAJAX = false ) {
