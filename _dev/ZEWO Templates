@@ -15,3 +15,4 @@ TODO :
 - {if CONDITION}{elseif CONDITION}{else}{/if}
 - {foreach $array as $item}{foreachelse}{/foreach}
 - {include}
+- {ldelim} {rdelim}
