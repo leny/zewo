@@ -35,6 +35,14 @@ class Config extends \Zewo\Tools\Singleton {
 			'cacheKey' => 'noCacheKey',
 			'baseClass' => 'Zewo\ORM\ZewoElement'
 		),
+		// TEMPLATES
+		'template' => array(
+			'cache' => false,
+			'folders' => array(
+				'cache' => './cache/',
+				'templates' => './templates/'
+			),
+		),
 	);
 
 } // class::Config

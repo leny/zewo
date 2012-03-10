@@ -19,7 +19,11 @@ class Zewo extends Tools\Singleton {
 			case 'globals':
 				return $this->utils->globals;
 				break;
-			// TODO : case 'template': break;
+			case 'templates':
+			case 'template':
+			case 'tpl':
+				return $this->_oTemplate;
+				break;
 			case 'db':
 				return $this->_oDB;
 				break;
@@ -63,9 +67,12 @@ class Zewo extends Tools\Singleton {
 		$this->_oConfig->apply( $aConfig );
 		$this->_oRouting = Routing\Router::getInstance();
 		$this->_oUtils = Utils\Utils::getInstance();
+		// db
 		$this->_oDB = DB\db::getInstance();
 		$this->_oDB->addConnexion( $this->config->get( 'db.connexion' ), $this->config->get( 'db.host' ), $this->config->get( 'db.login' ), $this->config->get( 'db.pass' ), true );
 		$this->_oDB->addDatabase( $this->config->get( 'db.connexion' ), $this->config->get( 'db.base' ), true );
+		// templates
+		$this->_oTemplate = Templates\Templating::getInstance();
 	} // _applyConfig
 
 	private $_oTemplate;
