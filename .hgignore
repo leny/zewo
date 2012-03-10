@@ -1,3 +1,4 @@
 syntax: glob
 *.sublime-project
 *.sublime-workspace
+_dev/Smarty-3.1.8
