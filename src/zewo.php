@@ -11,6 +11,7 @@ include( __DIR__ . '/tools/singleton.php' );
 
 include( __DIR__ . '/classes/routing/router.php' );
 include( __DIR__ . '/classes/routing/route.php' );
+include( __DIR__ . '/classes/routing/error_route.php' );
 
 include( __DIR__ . '/classes/zewo.php' );
 
