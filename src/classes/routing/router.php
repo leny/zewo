@@ -43,7 +43,8 @@ class Router extends \Zewo\Tools\Singleton {
 	} // error
 
 	public function redirect( $sPath ) {
-		// TODO : redirect to path
+		header( "Location: " . $sPath );
+		exit;
 	} // redirect
 
 	public function run() {
