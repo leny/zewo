@@ -32,11 +32,15 @@ class Route {
 	} // exec
 
 	private function _match( $sURI ) {
-		$bMatching = true;
-		$bMatching = $bMatching && $this->_matchMethod();
-		$bMatching = $bMatching && $this->_matchAJAX();
-		$bMatching = $bMatching && $this->_matchURL( $sURI );
-		return $bMatching;
+		if( $this->_matchURL( $sURI ) ) {
+			global $zewo;
+			if( !$this->_matchMethod() )
+				return $zewo->route->callError( 405 );
+			if( !$this->_matchAJAX() )
+				return $zewo->route->callError( 406 );
+			return true;
+		} else
+			return false;
 	} // _match
 
 	private function _matchMethod() {
