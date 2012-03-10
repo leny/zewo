@@ -42,6 +42,10 @@ class Zewo extends Tools\Singleton {
 			case 'redirect':
 				call_user_func_array( array( $this->route, $sName ), $aArguments );
 				break;
+			// UTILS shortcuts
+			case 'load':
+				call_user_func_array( array( $this->utils, $sName ), $aArguments );
+				break;
 		}
 	} // __call
 
