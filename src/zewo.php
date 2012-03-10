@@ -16,6 +16,9 @@ include( __DIR__ . '/classes/config/config.php' );
 
 include( __DIR__ . '/classes/db/db.php' );
 
+include( __DIR__ . '/classes/template/template.php' );
+include( __DIR__ . '/classes/template/templating.php' );
+
 include( __DIR__ . '/classes/routing/router.php' );
 include( __DIR__ . '/classes/routing/route.php' );
 include( __DIR__ . '/classes/routing/error_route.php' );
