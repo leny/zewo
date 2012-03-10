@@ -23,12 +23,8 @@ class Router extends \Zewo\Tools\Singleton {
 	} // map
 
 	public function error() {
-		// TODO : first param is http code, following is like the rest
+		$this->_registerError( func_get_args() );
 	} // error
-
-	public function redirect( $sPath ) {
-		// TODO : redirect to path
-	} // redirect
 
 	public function ajaxGet() {
 		$this->_registerRoute( func_get_args(), array( self::METHOD_GET ), true );
@@ -42,8 +38,15 @@ class Router extends \Zewo\Tools\Singleton {
 		$this->_registerRoute( func_get_args(), array( self::METHOD_GET, self::METHOD_POST ), true );
 	} // ajax
 
+	public function ajaxError() {
+		$this->_registerError( func_get_args(), true );
+	} // error
+
+	public function redirect( $sPath ) {
+		// TODO : redirect to path
+	} // redirect
+
 	public function run() {
-		// TODO : find the road that match the current url and launch it
 		$this->_sCurrentURI = $_SERVER[ 'REQUEST_URI' ];
 		$bHasMatched = false;
 		foreach( $this->_aRegisteredRoutes as $oRoute ) {
@@ -58,8 +61,17 @@ class Router extends \Zewo\Tools\Singleton {
 	} // run
 
 	public function callError( $iCode ) {
-		// TODO : look for Error Matching, else, display classical error
-		die( 'Error ' . $iCode );
+		$bHasMatched = false;
+		foreach( $this->_aRegisteredErrorRoutes as $oErrorRoute ) {
+			if( $oErrorRoute->match( $iCode ) ) {
+				$bHasMatched = true;
+				$oErrorRoute->exec();
+				break;
+			}
+		}
+		if( !$bHasMatched )
+			$this->_defaultErrorRouteHandler( 404 );
+		die();
 	} // callError
 
 	private function _registerRoute( $aParams, $aMethods, $bIsAJAX = false ) {
@@ -68,7 +80,32 @@ class Router extends \Zewo\Tools\Singleton {
 		$this->_aRegisteredRoutes[] = new \Zewo\Routing\Route( $sPattern, $aMethods, $aCallbacks, $bIsAJAX );
 	} // _registerRoute
 
+	private function _registerError( $aParams, $bIsAJAX = false ) {
+		$aCallbacks = $aParams;
+		$iErrorCode = array_shift( $aCallbacks );
+		$this->_aRegisteredErrorRoutes[] = new \Zewo\Routing\ErrorRoute( $iErrorCode, $aCallbacks, $bIsAJAX );
+	} // _registerError
+
+	private function _defaultErrorRouteHandler( $iCode ) {
+		switch( $iCode ) {
+			case 400: $sCodeDetails = 'Bad Request'; break;
+			case 401: $sCodeDetails = 'Unauthorized'; break;
+			case 403: $sCodeDetails = 'Forbidden'; break;
+			case 404: $sCodeDetails = 'Not Found'; break;
+			case 405: $sCodeDetails = 'Method Not Allowed'; break;
+			case 406: $sCodeDetails = 'Not Acceptable'; break;
+			case 408: $sCodeDetails = 'Request Timeout'; break;
+			case 409: $sCodeDetails = 'Conflict'; break;
+			case 410: $sCodeDetails = 'Gone'; break;
+			case 418: $sCodeDetails = 'I\'m a teapot'; break;
+			case 420: $sCodeDetails = 'Enhance Your Calm'; break;
+			case 429: $sCodeDetails = 'Bad Request'; break;
+		}
+		return header( "HTTP/1.0 " . $iCode . ' ' . $sCodeDetails );
+	} // _defaultErrorRouteHandler
+
 	private $_sCurrentURI;
 	private $_aRegisteredRoutes = array();
+	private $_aRegisteredErrorRoutes = array();
 
 } // class::Router
