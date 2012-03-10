@@ -20,7 +20,12 @@ class Zewo extends Tools\Singleton {
 				return $this->utils->globals;
 				break;
 			// TODO : case 'template': break;
-			// TODO : case 'db': break;
+			case 'db':
+				return $this->_oDB;
+				break;
+			case 'config':
+				return $this->_oConfig;
+				break;
 		}
 	} // __get
 
@@ -41,18 +46,28 @@ class Zewo extends Tools\Singleton {
 	} // __call
 
 	public function init( $mConfig=null ) {
-		// TODO : check config type
-		$this->_applyConfig();
+		if( is_array( $mConfig ) ) {
+			$aConfig = $mConfig;
+		} else {
+			// TODO : check if JSON file exists
+		}
+		$this->_applyConfig( $aConfig );
 	} // init
 
-	private function _applyConfig() {
+	private function _applyConfig( $aConfig ) {
+		$this->_oConfig = Config\Config::getInstance();
+		$this->_oConfig->apply( $aConfig );
 		$this->_oRouting = Routing\Router::getInstance();
 		$this->_oUtils = Utils\Utils::getInstance();
+		$this->_oDB = DB\db::getInstance();
+		$this->_oDB->addConnexion( $this->config->db_connexion, $this->config->db_host, $this->config->db_login, $this->config->db_pass, true );
+		$this->_oDB->addDatabase( $this->config->db_connexion, $this->config->db_base, true );
 	} // _applyConfig
 
 	private $_oTemplate;
 	private $_oRouting;
 	private $_oUtils;
 	private $_oDB;
+	private $_oConfig;
 
 } // class::Zewo

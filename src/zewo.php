@@ -12,6 +12,10 @@ include( __DIR__ . '/classes/utils/utils.php' );
 include( __DIR__ . '/classes/utils/convertor.php' );
 include( __DIR__ . '/classes/utils/globals.php' );
 
+include( __DIR__ . '/classes/config/config.php' );
+
+include( __DIR__ . '/classes/db/db.php' );
+
 include( __DIR__ . '/classes/routing/router.php' );
 include( __DIR__ . '/classes/routing/route.php' );
 include( __DIR__ . '/classes/routing/error_route.php' );
