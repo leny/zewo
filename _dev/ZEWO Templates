@@ -6,6 +6,7 @@ TODO :
 
 - assigning variables
 - {$variable}
+- generate opcoded version
 - generate cached version
 - render
 - {$variable.item.item}
