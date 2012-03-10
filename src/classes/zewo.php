@@ -60,8 +60,8 @@ class Zewo extends Tools\Singleton {
 		$this->_oRouting = Routing\Router::getInstance();
 		$this->_oUtils = Utils\Utils::getInstance();
 		$this->_oDB = DB\db::getInstance();
-		$this->_oDB->addConnexion( $this->config->db_connexion, $this->config->db_host, $this->config->db_login, $this->config->db_pass, true );
-		$this->_oDB->addDatabase( $this->config->db_connexion, $this->config->db_base, true );
+		$this->_oDB->addConnexion( $this->config->get( 'db.connexion' ), $this->config->get( 'db.host' ), $this->config->get( 'db.login' ), $this->config->get( 'db.pass' ), true );
+		$this->_oDB->addDatabase( $this->config->get( 'db.connexion' ), $this->config->get( 'db.base' ), true );
 	} // _applyConfig
 
 	private $_oTemplate;
