@@ -8,17 +8,17 @@ $zewo->run()
 
 ROUTING methods
 
-$zewo->route->get( path, (...middlewares...), callable )
+DONE : $zewo->route->get( path, (...middlewares...), callable )
 
-$zewo->route->post( path, (...middlewares...), callable )
+DONE : $zewo->route->post( path, (...middlewares...), callable )
 
-$zewo->route->map( path, (...middlewares...), callable ) // GET and/or POST
+DONE : $zewo->route->map( path, (...middlewares...), callable ) // GET and/or POST
 
-$zewo->route->ajax( path, method, (...middlewares...), callable );
+DONE : $zewo->route->ajax( path, method, (...middlewares...), callable );
 
-$zewo->route->error( code, (...middlewares...), callable )
+DONE : $zewo->route->error( code, (...middlewares...), callable )
 
-$zewo->route->redirect( path )
+DONE : $zewo->route->redirect( path )
 
 TEMPLATES methods
 
@@ -32,13 +32,13 @@ $zewo->template->close( template, [ var => template ] )
 
 UTILS methods
 
-$zewo->utils->convertor->... // convertor functions
+DONE : $zewo->utils->convertor->... // convertor functions
 
-$zewo->utils->trace()
+DONE : $zewo->utils->trace()
 
-$zewo->utils->console->... // more precise tracing functions
+DONE : $zewo->utils->console->... // more precise tracing functions
 
-$zewo->utils->... // content of functions.php (post, get, etc...)
+DONE : $zewo->utils->... // content of functions.php (post, get, etc...)
 
 DB methods
 

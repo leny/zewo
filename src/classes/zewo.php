@@ -12,8 +12,14 @@ class Zewo extends Tools\Singleton {
 			case 'route':
 				return $this->_oRouting;
 				break;
+			case 'utils':
+				return $this->_oUtils;
+				break;
+			case 'global':
+			case 'globals':
+				return $this->utils->globals;
+				break;
 			// TODO : case 'template': break;
-			// TODO : case 'utils': break;
 			// TODO : case 'db': break;
 		}
 	} // __get
@@ -41,6 +47,7 @@ class Zewo extends Tools\Singleton {
 
 	private function _applyConfig() {
 		$this->_oRouting = Routing\Router::getInstance();
+		$this->_oUtils = Utils\Utils::getInstance();
 	} // _applyConfig
 
 	private $_oTemplate;

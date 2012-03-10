@@ -6,8 +6,11 @@
 namespace Zewo;
 
 // TODO : loading all classes
-include( __DIR__ . '/tools/functions.php' );
 include( __DIR__ . '/tools/singleton.php' );
+
+include( __DIR__ . '/classes/utils/utils.php' );
+include( __DIR__ . '/classes/utils/convertor.php' );
+include( __DIR__ . '/classes/utils/globals.php' );
 
 include( __DIR__ . '/classes/routing/router.php' );
 include( __DIR__ . '/classes/routing/route.php' );

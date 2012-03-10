@@ -109,4 +109,18 @@ class Router extends \Zewo\Tools\Singleton {
 	private $_aRegisteredRoutes = array();
 	private $_aRegisteredErrorRoutes = array();
 
+	/* TODO : adapt these
+		function lock($sLogin, $sPassword, $sWarning="Connexion &eacute;chou&eacute;e : mauvais login et/mot de passe") {
+			if (!server('PHP_AUTH_USER')) {
+			  header('WWW-Authenticate: Basic realm="Calcium"');
+			  header('HTTP/1.0 401 Unauthorized');
+			  die($sWarning);
+			} else if(server('PHP_AUTH_USER') !== $sLogin || server('PHP_AUTH_PW') !== $sPassword) {
+			  header('WWW-Authenticate: Basic realm="CORESystem"');
+			  header('HTTP/1.0 401 Unauthorized');
+			  die($sWarning);
+			}
+		} // lock
+	*/
+
 } // class::Router
