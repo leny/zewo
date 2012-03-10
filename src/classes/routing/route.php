@@ -80,10 +80,7 @@ class Route {
 
 	private function _convertPatternToRegex( $aMatches ) {
 		$sKey = str_replace(':', '', $aMatches[0]);
-		if ( array_key_exists( $sKey, $this->_aConditions ) )
-			return '(?P<' . $sKey . '>' . $this->_aConditions[$sKey] . ')';
-		else
-			return '(?P<' . $sKey . '>[a-zA-Z0-9_\-\.\!\~\*\\\'\(\)\:\@\&\=\$\+,%]+)';
+		return '(?P<' . $sKey . '>[a-zA-Z0-9_\-\.\!\~\*\\\'\(\)\:\@\&\=\$\+,%]+)';
 	} // _convertPatternToRegex
 
 	private $_sCurrentURI;
@@ -91,7 +88,6 @@ class Route {
 	private $_bIsAJAX = false;
 	private $_sPattern;
 	private $_aAllowedMethods;
-	private $_aConditions = array();
 	private $_aCallbacks = array();
 
 	private $_sPatternAsRegex;
