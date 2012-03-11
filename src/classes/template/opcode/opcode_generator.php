@@ -34,17 +34,28 @@ class OpcodeGenerator {
 
 	private function _replaceVars() {
 		$this->_sOpcodeReturn = preg_replace_callback( $this->_sVarsRegex, array( $this, '_parseVar' ), $this->_sOpcodeReturn );
-		$this->_oZewo->utils->trace( $this->_sOpcodeReturn );
 	} // _replaceVars
 
 	private function _parseVar( $aMatches ) {
-		$this->_oZewo->utils->trace( $aMatches );
-		$sVarName = $aMatches[1];
-		// TODO dots in var names
+		// building var expression
+		$aVarComponenents = preg_split( '/(\.|\-\>|\[.+\])/', $aMatches[1], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
+		$sVarName = '';
+		for( $i = -1, $l = sizeof( $aVarComponenents ); ++$i < $l; ) {
+			if( $aVarComponenents[ $i ] == '.' )
+				$sVarName .= "[ '" . $aVarComponenents[ ++$i ] . "' ]";
+			elseif( $aVarComponenents[ $i ] == '->' )
+				$sVarName .= "->" . $aVarComponenents[ ++$i ];
+			else
+				$sVarName .= $aVarComponenents[ $i ];
+		}
 		// functions applied
 		if( isset( $aMatches[2] ) ) {
 			$aFunctions = explode( '|', $aMatches[2] );
-			$this->_oZewo->utils->trace( $aFunctions );
+			foreach( $aFunctions as $sFunction ) {
+				$aFunctionComponents = explode( ':', $sFunction );
+				$sFunctionName = array_shift( $aFunctionComponents );
+				$sVarName = $sFunctionName . '( ' . $sVarName .  '' . ( sizeof( $aFunctionComponents ) ? ', ' . implode( ', ', $aFunctionComponents ) : '' ) . ' )';
+			}
 		}
 		return '<?=' . $sVarName . '; ?>';
 	} // _parseVar
