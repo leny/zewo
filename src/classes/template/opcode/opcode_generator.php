@@ -46,9 +46,6 @@ class OpcodeGenerator {
 	} // _parseExpressionBlock
 
 	private function _parseExpression( $sExpression ) {
-			// splitting conditions
-
-			// splitting maths
 		$sExpression = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1 );
 		return $sExpression;
 	} // _parseExpression
@@ -100,7 +97,6 @@ class OpcodeGenerator {
 
 	private function _replaceIfs() {
 		$this->_sOpcodeReturn = preg_replace_callback( $this->_sIfBlocksOpenRegex, array( $this, '_parseIfBlockOpen' ), $this->_sOpcodeReturn );
-
 		$this->_sOpcodeReturn = preg_replace( $this->_sIfBlocksElseRegex, '<?php else: ?>', $this->_sOpcodeReturn );
 		$this->_sOpcodeReturn = preg_replace( $this->_sIfBlocksCloseRegex, '<?php endif; ?>', $this->_sOpcodeReturn );
 	} // _replaceIfs
