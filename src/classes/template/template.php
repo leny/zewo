@@ -43,7 +43,8 @@ class Template extends \Zewo\Tools\Singleton {
 			// TODO
 		} else {
 			$oOpcodeGenerator = new \Zewo\Templates\Opcode\OpcodeGenerator( file_get_contents( $this->_sTPLPath ) );
-			file_put_contents( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' , $oOpcodeGenerator->generate( $this->_sCacheName ) );
+			$oOpcodeGenerator->generate( $this->_sCacheName );
+			// file_put_contents( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' , $oOpcodeGenerator->generate( $this->_sCacheName ) );
 		}
 	} // _parseTemplate
 

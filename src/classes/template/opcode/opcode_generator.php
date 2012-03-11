@@ -16,11 +16,11 @@ class OpcodeGenerator {
 		$this->_initOpcode( $sOpcodeID );
 		// comments
 		$this->_replaceComments();
-		// inline elements
-		$this->_replaceVars();
-		$this->_replaceConstants();
 		// blocks elements
 		$this->_replaceIfs();
+		// inline elements
+		$this->_replaceExpressions();
+
 		$this->_oZewo->utils->trace( $this->_sOpcodeReturn );
 		return $this->_sOpcodeReturn;
 	} // generate
@@ -37,12 +37,46 @@ class OpcodeGenerator {
 		$this->_sOpcodeReturn = preg_replace( $this->_sBlockCommentsRegex, '', $this->_sOpcodeReturn );
 	} // _replaceComments
 
+	private function _replaceExpressions() {
+		$this->_sOpcodeReturn = preg_replace_callback( $this->_sExpressionBlockRegex, array( $this, '_parseExpressionBlock' ), $this->_sOpcodeReturn );
+	} // _replaceExpressions
+
+	private function _parseExpressionBlock( $aMatches ) {
+		return '<?=' . $this->_parseExpression( $aMatches[ 1 ] ) . ' ?>';
+	} // _parseExpressionBlock
+
+	private function _parseExpression( $sExpression ) {
+			// splitting conditions
+
+			// splitting maths
+		$sExpression = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1 );
+		return $sExpression;
+	} // _parseExpression
+
+	private function _parseExpressionParts( $aMatches ) {
+		$sExpression  = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 1 ] ) ) );
+		$sExpression .= ' ' . trim( $aMatches[ 2 ] ) . ' ';
+		$sExpression .= preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 3 ] ) ) );
+		return $sExpression;
+	} // _parseExpressionParts
+
+	private function _parseExpressionPart( $sPart ) {
+		// constants
+		$sPart = str_replace( '#', '', $sPart );
+		// var
+		$aVarParts = explode( '|', $sPart );
+		$sVarName = $this->_parseVar( array_shift( $aVarParts ) );
+		if( sizeof( $aVarParts ) )
+			$sVarName = $this->_applyFunctionToVarExpression( $sVarName, $aVarParts );
+		return $sVarName;
+	} // _parseExpressionPart
+
 	private function _replaceVars() {
-		$this->_sOpcodeReturn = preg_replace_callback( $this->_sVarsRegex, array( $this, '_parseVar' ), $this->_sOpcodeReturn );
+		$this->_sOpcodeReturn = preg_replace_callback( $this->_sVarsRegex, array( $this, '_parseExpressionBlock' ), $this->_sOpcodeReturn );
 	} // _replaceVars
 
-	private function _parseVar( $aMatches ) {
-		$aVarComponents = preg_split( '/(\.|\-\>|\[.+\])/', $aMatches[1], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
+	private function _parseVar( $sVarName ) {
+		$aVarComponents = preg_split( '/(\.|\-\>|\[.+\])/', $sVarName, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
 		$sVarName = '';
 		for( $i = -1, $l = sizeof( $aVarComponents ); ++$i < $l; ) {
 			if( $aVarComponents[ $i ] == '.' )
@@ -52,24 +86,10 @@ class OpcodeGenerator {
 			else
 				$sVarName .= $aVarComponents[ $i ];
 		}
-		if( isset( $aMatches[ 2 ] ) )
-			$sVarName = $this->_applyFunctionToVarExpression( $sVarName, $aMatches[ 2 ] );
-		return '<?=' . $sVarName . '; ?>';
+		return $sVarName;
 	} // _parseVar
 
-	private function _replaceConstants() {
-		$this->_sOpcodeReturn = preg_replace_callback( $this->_sConstantsRegex, array( $this, '_parseConstants' ), $this->_sOpcodeReturn );
-	} // _replaceConstants
-
-	private function _parseConstants( $aMatches ) {
-		$sVarName = $aMatches[ 1 ];
-		if( isset( $aMatches[ 2 ] ) )
-			$sVarName = $this->_applyFunctionToVarExpression( $sVarName, $aMatches[ 2 ] );
-		return '<?=' . $sVarName . '; ?>';
-	} // _parseConstants
-
-	private function _applyFunctionToVarExpression( $sVarName, $sFunctionsDefinition ) {
-		$aFunctions = explode( '|', $sFunctionsDefinition );
+	private function _applyFunctionToVarExpression( $sVarName, $aFunctions ) {
 		foreach( $aFunctions as $sFunction ) {
 			$aFunctionComponents = explode( ':', $sFunction );
 			$sFunctionName = array_shift( $aFunctionComponents );
@@ -89,21 +109,22 @@ class OpcodeGenerator {
 		return '<?php ' . $aMatches[ 1 ] . 'if( ' . $this->_parseExpression( $aMatches[ 2 ] ) . ' ): ?>';
 	} // _parseIfBlockOpen
 
-	private function _parseExpression( $sExpression ) {
-		// TODO
-		return $sExpression;
-	} // _parseExpression
-
 	private $_sTemplateSource;
 	private $_sOpcodeReturn;
 
 	private $_oZewo;
 
 	// regexes
+		// comments
 	private $_sSimpleCommentsRegex = '/(\{\*.+\*\})/';
 	private $_sBlockCommentsRegex = '/(\{\*\}.+\{\*\})/sme';
-	private $_sVarsRegex = '/\{(\$[^\|\}]+)[\|]*(.+)*\}/';
-	private $_sConstantsRegex = '/\{#([^\|\}]+)[\|]*(.+)*\}/';
+		// expression
+	private $_sExpressionBlockRegex = '/\{([^\}]+)\}/';
+	private $_aExpressionSplitRegexes = array(
+		'/(.+)\s(<>|!=+|==+)(.+)/',
+		'/(.+)([^-][<>]=?)(.+)/',
+		'/(.+)(\+|-[^\>]|\*|\/|%)(.+)/',
+	);
 		// if blocks
 	private $_sIfBlocksOpenRegex = '/\{([else|else ]*)if ([^\}]+)\}/';
 	private $_sIfBlocksElseRegex = '/\{else\}/';
