@@ -33,8 +33,21 @@ class OpcodeGenerator {
 	} // _replaceComments
 
 	private function _replaceVars() {
-
+		$this->_sOpcodeReturn = preg_replace_callback( $this->_sVarsRegex, array( $this, '_parseVar' ), $this->_sOpcodeReturn );
+		$this->_oZewo->utils->trace( $this->_sOpcodeReturn );
 	} // _replaceVars
+
+	private function _parseVar( $aMatches ) {
+		$this->_oZewo->utils->trace( $aMatches );
+		$sVarName = $aMatches[1];
+		// TODO dots in var names
+		// functions applied
+		if( isset( $aMatches[2] ) ) {
+			$aFunctions = explode( '|', $aMatches[2] );
+			$this->_oZewo->utils->trace( $aFunctions );
+		}
+		return '<?=' . $sVarName . '; ?>';
+	} // _parseVar
 
 	private $_sTemplateSource;
 	private $_sOpcodeReturn;
@@ -44,6 +57,6 @@ class OpcodeGenerator {
 	// regexes
 	private $_sSimpleCommentsRegex = '/(\{\*.+\*\})/';
 	private $_sBlockCommentsRegex = '/(\{\*\}.+\{\*\})/sme';
-	private $_sSimpleVarsRegex = '//';
+	private $_sVarsRegex = '/\{(\$[^\|\}]+)[\|]*(.+)*\}/';
 
 } // class::OpcodeGenerator
