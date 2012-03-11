@@ -18,6 +18,7 @@ class OpcodeGenerator {
 		$this->_replaceComments();
 		// blocks elements
 		$this->_replaceIfs();
+		$this->_replaceForeachs();
 		// inline elements
 		$this->_replaceExpressions();
 
@@ -46,11 +47,14 @@ class OpcodeGenerator {
 	} // _parseExpressionBlock
 
 	private function _parseExpression( $sExpression ) {
-		$sExpression = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1 );
-		return $sExpression;
+		$sExpressionAfter = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1 );
+		if( $sExpression == $sExpressionAfter )
+			$sExpressionAfter = $this->_parseExpressionPart( $sExpressionAfter );
+		return $sExpressionAfter;
 	} // _parseExpression
 
 	private function _parseExpressionParts( $aMatches ) {
+
 		$sExpression  = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 1 ] ) ) );
 		$sExpression .= ' ' . trim( $aMatches[ 2 ] ) . ' ';
 		$sExpression .= preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 3 ] ) ) );
@@ -105,6 +109,43 @@ class OpcodeGenerator {
 		return '<?php ' . $aMatches[ 1 ] . 'if( ' . $this->_parseExpression( $aMatches[ 2 ] ) . ' ): ?>';
 	} // _parseIfBlockOpen
 
+	private function _replaceForeachs() {
+		$this->_sOpcodeReturn = preg_replace_callback( $this->_sForeachBlocksRegex, array( $this, '_parseForeachBlock' ), $this->_sOpcodeReturn );
+	} // _replaceForeachs
+
+	private function _parseForeachBlock( $aMatches ) {
+		// $this->_oZewo->utils->trace( $aMatches );
+		$sCode = '';
+		// parse parameters
+		$aParameters = array(
+			'name' => 'loop',
+			'key' => 'key'
+		);
+		$aRawParameters = explode( ' ', $aMatches[ 1 ] );
+		foreach( $aRawParameters as $sRawParameter ) {
+			preg_match( '/(from|item|key|name)=(.+)/', $sRawParameter, $aParamMatches );
+			$aParameters[ $aParamMatches[ 1 ] ] = ( $aParamMatches[ 1 ] == 'from' ) ? $this->_parseExpressionPart( $aParamMatches[ 2 ] ) : str_replace( array( '"', "'" ), '', $aParamMatches[ 2 ] );
+		}
+		// has foreachelse ?
+		if( isset( $aMatches[ 3 ] ) && strpos( $aMatches[ 3 ], '{foreachelse}' ) !== false )
+			$sCode .= '<?php if( !isset( ' . $aParameters[ 'from' ] . ' ) || sizeof( ' . $aParameters[ 'from' ] . ' ) === 0 ): ?>' . "\n";
+		$sCode .= '<?php $' . $aParameters[ 'name' ] . '_index = 0; foreach( ' . $aParameters[ 'from' ] . ' as $' . $aParameters[ 'key' ] . ' => &$' . $aParameters[ 'item' ] . ' ): ' . "\n";
+			$sCode .= "\t" . '$' . $aParameters[ 'name' ] . ' = array(' . "\n";
+			$sCode .= "\t\t" . '"index" => $' . $aParameters[ 'name' ] . '_index,' . "\n";
+			$sCode .= "\t\t" . '"iteration" => $' . $aParameters[ 'name' ] . '_index + 1,' . "\n";
+			$sCode .= "\t\t" . '"first" => $' . $aParameters[ 'name' ] . '_index === 0,' . "\n";
+			$sCode .= "\t\t" . '"last" => $' . $aParameters[ 'name' ] . '_index - 1 === sizeof( ' . $aParameters[ 'from' ] . ' ),' . "\n";
+			$sCode .= "\t" . '); ?>' . "\n";
+			$sCode .= "\t" . trim( $aMatches[ 2 ] ) . "\n";
+		$sCode .= '<?php $' . $aParameters[ 'name' ] . '_index++; endforeach; ?>' . "\n";
+		if( isset( $aMatches[ 3 ] ) && strpos( $aMatches[ 3 ], '{foreachelse}' ) !== false ) {
+			$sCode .= '<?php else: ?>' . "\n";
+				$sCode .= "\t" . trim( $aMatches[ 4 ] ) . "\n";
+			$sCode .= '<?php endif; ?>' . "\n";
+		}
+		return $sCode;
+	} // _parseForeachBlock
+
 	private $_sTemplateSource;
 	private $_sOpcodeReturn;
 
@@ -125,5 +166,7 @@ class OpcodeGenerator {
 	private $_sIfBlocksOpenRegex = '/\{([else|else ]*)if ([^\}]+)\}/';
 	private $_sIfBlocksElseRegex = '/\{else\}/';
 	private $_sIfBlocksCloseRegex = '/\{\/if\}/';
+		// foreach blocks
+	private $_sForeachBlocksRegex = '/\{foreach\s([^\}]*)\}(.*?)(\{foreachelse\}(.*?))?\{\/foreach\}/sm';
 
 } // class::OpcodeGenerator
