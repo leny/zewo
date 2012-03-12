@@ -16,7 +16,6 @@ include( __DIR__ . '/classes/config/config.php' );
 
 include( __DIR__ . '/classes/db/db.php' );
 
-include( __DIR__ . '/classes/template/opcode/opcode_generator.php' );
 include( __DIR__ . '/classes/template/template.php' );
 include( __DIR__ . '/classes/template/templating.php' );
 
