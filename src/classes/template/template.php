@@ -23,11 +23,16 @@ class Template extends \Zewo\Tools\Singleton {
 		$this->_sTPLPath = $sCompleteTPLPath;
 	} // __construct
 
-	public function render( $bDisplay=true, $sCacheID = null ) {
-		$this->_genCacheName( $sCacheID );
+	public function generate( $sCacheID = null ) {
+		$this->_sCacheID = $sCacheID;
+		$this->_genCacheName();
 		$this->_sOpCodePath = $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc';
 		if( !$this->_existsInOpcode() )
 			$this->_generateOpcode();
+	} // generate
+
+	public function render( $bDisplay=true, $sCacheID = null ) {
+		$this->generate( $sCacheID );
 		$sOpcode = $this->_getFromOpcode();
 		if( $bDisplay ) {
 			$this->_oZewo->utils->trace( 'render template' );
@@ -37,7 +42,7 @@ class Template extends \Zewo\Tools\Singleton {
 	} // render
 
 	private function _existsInOpcode() {
-		return $this->_bForceExists || file_exists( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' );
+		return in_array( $this->_sCacheName, self::$_aCompiledTemplates ) || file_exists( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' );
 	} // _existsInOpcode
 
 	private function _getFromOpcode() {
@@ -45,6 +50,7 @@ class Template extends \Zewo\Tools\Singleton {
 	} // _getFromOpcode
 
 	private function _generateOpcode() {
+		self::$_aCompiledTemplates[] = $this->_sCacheName;
 		$this->_sOpCodeContent  = '<?php /* ZEWO Opcode Template : ' . $this->_sCacheName . ' */ ?>' . "\n";
 		$this->_sOpCodeContent .= file_get_contents( $this->_sTPLPath );
 
@@ -92,7 +98,7 @@ class Template extends \Zewo\Tools\Singleton {
 		$sCode .= '?> ' . "\n";
 		// TODO : avoid recursivity
 		$oTemplate = new \Zewo\Templates\Template( $sFileToLoad );
-		$oTemplate->render( false );
+		$oTemplate->generate( $this->_sCacheID );
 		$sCode .= '<?php include( "' . $oTemplate->opcodePath . '" ); ?>' . "\n";
 
 		$sCode .= '<?php ' . "\n";
@@ -218,10 +224,10 @@ class Template extends \Zewo\Tools\Singleton {
 		return $sCode;
 	} // _parseForeachBlock
 
-	private function _genCacheName( $sCacheID = '' ) {
+	private function _genCacheName() {
 		// cache name is md5 of md5_file of template + cacheID
 		if( is_null( $this->_sCacheName ) )
-			$this->_sCacheName = md5( md5_file( $this->_sTPLPath ) . $sCacheID );
+			$this->_sCacheName = md5( md5_file( $this->_sTPLPath ) . $this->_sCacheID );
 	} // _genCacheName
 
 	private $_sTPLPath;
@@ -232,8 +238,11 @@ class Template extends \Zewo\Tools\Singleton {
 	private $_sOpCodeContent;
 
 	private $_sCacheName;
+	private $_sCacheID = '';
 
 	private $_oZewo;
+
+	private static $_aCompiledTemplates = array();
 
 	// regexes
 		// comments
