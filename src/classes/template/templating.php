@@ -19,10 +19,14 @@ class Templating extends \Zewo\Tools\Singleton {
 		return isset( $this->_aAssignedVariables[ $sName ] ) ? $this->_aAssignedVariables[ $sName ] : null ;
 	} // getAssignedVariable
 
-	public function display( $sTPLPath ) {
-		// TODO : generate assigned vars 
-		$this->_getTemplate( $sTPLPath )->render();
+	public function display( $sTPLPath, $sCacheID = null ) {
+		$sTemplateFilePath = $this->_getTemplateFile( $sTPLPath, $sCacheID );
+		include( $sTemplateFilePath );
 	} // display
+
+	protected function __construct() {
+		$this->_oZewo = \Zewo\Zewo::getInstance();
+	} // __construct
 
 	private function _getTemplate( $sTPLPath ) {
 		if( !isset( $this->_aRegisteredTemplates[ $sTPLPath ] ) )
@@ -37,6 +41,17 @@ class Templating extends \Zewo\Tools\Singleton {
 		$sCode .= '?>' . "\n";
 		return $sCode;
 	} // _generateAssignedVars
+
+	private function _getTemplateFile( $sTPLPath, $sCacheID = null ) {
+		$sTemplateFilePath = $this->_oZewo->config->get( 'template.folders.cache' ) . md5( md5_file( $sTPLPath ) . $sCacheID ) . '.tpc';
+		$sTPLFileContent  = $this->generateAssignedVars();
+		$sTPLFileContent .= $this->_getTemplate( $sTPLPath )->render( $sCacheID );
+		if( !file_put_contents( $sTemplateFilePath, $sTPLFileContent ) )
+			throw new RuntimeException( 'The template file "' . $sTemplateFilePath . '" cannot be written !' );
+		return $sTemplateFilePath;
+	} // _getTemplateFile
+
+	private $_oZewo;
 
 	private $_aAssignedVariables = array();
 	private $_aRegisteredTemplates = array();
