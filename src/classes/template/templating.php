@@ -5,6 +5,8 @@
 
 namespace Zewo\Templates;
 
+// TODO : temporary assigns (for fetches and others)
+
 class Templating extends \Zewo\Tools\Singleton {
 
 	public function assign( $sName, $mValue ) {
@@ -19,7 +21,8 @@ class Templating extends \Zewo\Tools\Singleton {
 		return isset( $this->_aAssignedVariables[ $sName ] ) ? $this->_aAssignedVariables[ $sName ] : null ;
 	} // getAssignedVariable
 
-	public function display( $sTPLPath, $sCacheID = null ) {
+	public function display( $sTPLPath, $aFetches = array(), $sCacheID = null ) {
+		// TODO : assign fetches
 		$sTemplateFilePath = $this->_getTemplateFile( $sTPLPath, $sCacheID );
 		include( $sTemplateFilePath );
 	} // display
