@@ -34,6 +34,13 @@ class Templating extends \Zewo\Tools\Singleton {
 		include( $sTemplateFilePath );
 	} // display
 
+	public function close( $sTPLPath, $aFetches = array(), $sCacheID = null ) {
+		// TODO : assign fetches
+		$sTemplateFilePath = $this->_getTemplateFile( $sTPLPath, $sCacheID );
+		include( $sTemplateFilePath );
+		die();
+	} // close
+
 	protected function __construct() {
 		$this->_oZewo = \Zewo\Zewo::getInstance();
 	} // __construct
