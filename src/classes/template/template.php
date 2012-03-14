@@ -31,14 +31,10 @@ class Template {
 			$this->_generateOpcode();
 	} // generate
 
-	public function render( $bDisplay=true, $sCacheID = null ) {
+	public function render( $sCacheID = null ) {
 		$this->generate( $sCacheID );
 		$sOpcode = $this->_getFromOpcode();
-		if( $bDisplay ) {
-			$this->_oZewo->utils->trace( 'render template' );
-			// TODO : display
-		} else
-			return $sOpcode;
+		return $sOpcode;
 	} // render
 
 	private function _existsInOpcode() {
