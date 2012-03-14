@@ -5,7 +5,7 @@
 
 namespace Zewo\Templates;
 
-class Template extends \Zewo\Tools\Singleton {
+class Template {
 
 	public function __get( $sName ) {
 		switch( $sName ) {

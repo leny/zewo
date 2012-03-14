@@ -14,5 +14,5 @@ TODO :
 - {$variable|function:params}											OK
 - {if CONDITION}{elseif CONDITION}{else}{/if}							OK
 - {foreach $array as $item}{foreachelse}{/foreach}						OK
-- {include}
+- {include}																OK
 - {ldelim} {rdelim}
