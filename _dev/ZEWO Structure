@@ -26,7 +26,7 @@ $zewo->template->assign( name, value )
 
 $zewo->template->fetch( template )
 
-$zewo->template->display( template, [ var => template ] )
+DONE : $zewo->template->display( template, [ var => template ] )
 
 $zewo->template->close( template, [ var => template ] )
 
