@@ -29,21 +29,26 @@ class Templating extends \Zewo\Tools\Singleton {
 	} // fetch
 
 	public function display( $sTPLPath, $aFetches = array(), $sCacheID = null ) {
-		// TODO : assign fetches
+		$this->_assignFetches( $aFetches );
 		$sTemplateFilePath = $this->_getTemplateFile( $sTPLPath, $sCacheID );
 		include( $sTemplateFilePath );
 	} // display
 
 	public function close( $sTPLPath, $aFetches = array(), $sCacheID = null ) {
-		// TODO : assign fetches
-		$sTemplateFilePath = $this->_getTemplateFile( $sTPLPath, $sCacheID );
-		include( $sTemplateFilePath );
+		$this->display( $sTPLPath, $aFetches, $sCacheID );
 		die();
 	} // close
 
 	protected function __construct() {
 		$this->_oZewo = \Zewo\Zewo::getInstance();
 	} // __construct
+	
+	private function _assignFetches( $aFetches = array() ) {
+		if( !is_array( $aFetches ) || !sizeof( $aFetches ) )
+			return;
+		foreach( $aFetches as $sName => $sTPLPath )
+			$this->assign( $sName, $this->fetch( $sTPLPath ) );
+	} // _assignFetches
 
 	private function _getTemplate( $sTPLPath ) {
 		if( !isset( $this->_aRegisteredTemplates[ $sTPLPath ] ) )
