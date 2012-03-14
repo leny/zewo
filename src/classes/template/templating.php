@@ -14,8 +14,13 @@ class Templating extends \Zewo\Tools\Singleton {
 	public function assignByRef( $sName, &$mValue ) {
 		$this->_aAssignedVariables[ $sName ] = $mValue;
 	} // assignByRef
+	
+	public function getAssignedVariable( $sName ) {
+		return isset( $this->_aAssignedVariables[ $sName ] ) ? $this->_aAssignedVariables[ $sName ] : null ;
+	} // getAssignedVariable
 
 	public function display( $sTPLPath ) {
+		// TODO : generate assigned vars 
 		$this->_getTemplate( $sTPLPath )->render();
 	} // display
 
@@ -24,6 +29,14 @@ class Templating extends \Zewo\Tools\Singleton {
 			$this->_aRegisteredTemplates[ $sTPLPath ] = new Template( $sTPLPath );
 		return $this->_aRegisteredTemplates[ $sTPLPath ];
 	} // _getTemplate
+	
+	private function _generateAssignedVars() {
+		$sCode  = '<?php ' . "\n";
+		foreach( $this->_aAssignedVariables as $sName => $mValue )
+			$sCode .= '		$' . $sName . ' = \Zewo\Templates\Templating::getInstance()->getAssignedVariable( ' . $sName . ' );' . "\n";
+		$sCode .= '?>' . "\n";
+		return $sCode;
+	} // _generateAssignedVars
 
 	private $_aAssignedVariables = array();
 	private $_aRegisteredTemplates = array();
