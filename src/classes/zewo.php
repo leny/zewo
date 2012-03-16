@@ -33,6 +33,9 @@ class Zewo extends Tools\Singleton {
 			case 'cache':
 				return $this->_oCache;
 				break;
+			case 'orm':
+				return $this->_oORM;
+				break;
 		}
 	} // __get
 
@@ -78,6 +81,7 @@ class Zewo extends Tools\Singleton {
 		$this->_oTemplate = Templates\Templating::getInstance();
 		// cache
 		$this->_oCache = Tools\Cache\Cache::getInstanceOf( $this->config->get( 'cache.type' ) );
+		$this->_oORM = ORM\ORM::getInstance();
 	} // _applyConfig
 
 	private $_oTemplate;
@@ -86,5 +90,6 @@ class Zewo extends Tools\Singleton {
 	private $_oDB;
 	private $_oConfig;
 	private $_oCache;
+	private $_oORM;
 
 } // class::Zewo
