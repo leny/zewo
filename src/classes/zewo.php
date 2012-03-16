@@ -30,6 +30,9 @@ class Zewo extends Tools\Singleton {
 			case 'config':
 				return $this->_oConfig;
 				break;
+			case 'cache':
+				return $this->_oCache;
+				break;
 		}
 	} // __get
 
@@ -73,6 +76,8 @@ class Zewo extends Tools\Singleton {
 		$this->_oDB->addDatabase( $this->config->get( 'db.connexion' ), $this->config->get( 'db.base' ), true );
 		// templates
 		$this->_oTemplate = Templates\Templating::getInstance();
+		// cache
+		$this->_oCache = Tools\Cache\Cache::getInstanceOf( $this->config->get( 'cache.type' ) );
 	} // _applyConfig
 
 	private $_oTemplate;
@@ -80,5 +85,6 @@ class Zewo extends Tools\Singleton {
 	private $_oUtils;
 	private $_oDB;
 	private $_oConfig;
+	private $_oCache;
 
 } // class::Zewo

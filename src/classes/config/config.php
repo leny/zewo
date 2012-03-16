@@ -30,17 +30,21 @@ class Config extends \Zewo\Tools\Singleton {
 			'pass' => '',
 			'base' => '',
 		),
+		// CACHE
+		'cache' => array(
+			'type' => \Zewo\Tools\Cache\Cache::APC,
+		),
 		// ORM
 		'orm' => array(
 			'cacheKey' => 'noCacheKey',
-			'baseClass' => 'Zewo\ORM\ZewoElement'
+			'baseClass' => 'Zewo\ORM\ZewoElement',
 		),
 		// TEMPLATES
 		'template' => array(
 			'cache' => false,
 			'folders' => array(
 				'cache' => './cache/',
-				'templates' => './templates/'
+				'templates' => './templates/',
 			),
 		),
 	);
