@@ -62,8 +62,8 @@ class Zewo extends Tools\Singleton {
 	public function init( $mConfig=null ) {
 		if( is_array( $mConfig ) ) {
 			$aConfig = $mConfig;
-		} else {
-			// TODO : check if JSON file exists
+		} elseif( file_exists( $mConfig ) ) {
+			$aConfig = json_decode( file_get_contents( $mConfig ), true ) ?: array();
 		}
 		$this->_applyConfig( $aConfig );
 	} // init
