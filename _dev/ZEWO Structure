@@ -1,0 +1,49 @@
+ZEWO Structure
+
+$zewo->init( path|array )
+
+$zewo->load( path|pattern|array )
+
+$zewo->run()
+
+ROUTING methods
+
+DONE : $zewo->route->get( path, (...middlewares...), callable )
+
+DONE : $zewo->route->post( path, (...middlewares...), callable )
+
+DONE : $zewo->route->map( path, (...middlewares...), callable ) // GET and/or POST
+
+DONE : $zewo->route->ajax( path, method, (...middlewares...), callable );
+
+DONE : $zewo->route->error( code, (...middlewares...), callable )
+
+DONE : $zewo->route->redirect( path )
+
+TEMPLATES methods
+
+DONE : $zewo->template->assign( name, value )
+
+DONE : $zewo->template->fetch( template )
+
+DONE : $zewo->template->display( template, [ var => template ] )
+
+$zewo->template->close( template, [ var => template ] )
+
+UTILS methods
+
+DONE : $zewo->utils->convertor->... // convertor functions
+
+DONE : $zewo->utils->trace()
+
+DONE : $zewo->utils->console->... // more precise tracing functions
+
+DONE : $zewo->utils->... // content of functions.php (post, get, etc...)
+
+DB methods
+
+$zewo->db->query()
+
+$zewo->db->queryOne()
+
+$zewo->db->queryField()
