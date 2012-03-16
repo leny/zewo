@@ -6,8 +6,8 @@ TODO :
 
 - assigning variables
 - {$variable}															OK
-- generate opcoded version
-- render
+- generate opcoded version												OK
+- render																OK
 - {$variable.item.item}													OK
 - {#CONSTANTE}															OK
 - {$variable|function}													OK
@@ -16,3 +16,4 @@ TODO :
 - {foreach $array as $item}{foreachelse}{/foreach}						OK
 - {include}																OK
 - {ldelim} {rdelim}
+- create new blocks
