@@ -22,13 +22,13 @@ DONE : $zewo->route->redirect( path )
 
 TEMPLATES methods
 
-$zewo->template->assign( name, value )
+DONE : $zewo->template->assign( name, value )
 
-$zewo->template->fetch( template )
+DONE : $zewo->template->fetch( template )
 
 DONE : $zewo->template->display( template, [ var => template ] )
 
-$zewo->template->close( template, [ var => template ] )
+DONE : $zewo->template->close( template, [ var => template ] )
 
 UTILS methods
 
@@ -42,8 +42,8 @@ DONE : $zewo->utils->... // content of functions.php (post, get, etc...)
 
 DB methods
 
-$zewo->db->query()
+DONE : $zewo->db->query()
 
-$zewo->db->queryOne()
+DONE : $zewo->db->queryOne()
 
-$zewo->db->queryField()
+DONE : $zewo->db->queryField()
