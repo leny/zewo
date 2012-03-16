@@ -117,6 +117,22 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		return $this->_bNew && empty( $this->_aColumnsData );
 	} // isNull
 
+	public static function get( $sQuery ) {
+		return new \Zewo\ORM\Elements\Elements( get_called_class(), $sQuery );
+	} // get
+
+	public static function getAll() {
+		// build query
+		$oTable = new \Zewo\ORM\Structure\Table( \Zewo\Zewo::getInstance()->db->currentDatabase, \Zewo\Zewo::getInstance()->utils->convertor->fromClassNameToTableName( get_called_class() ) );
+		$aPrimary = array();
+		if( $oTable->hasMultiplePrimary() )
+			foreach( $oTable->primary as $oColumn )
+				$aPrimary[] = $oColumn->name;
+		else
+			$aPrimary[] = $oTable->primary->name;
+		return self::get( "SELECT " . implode( ',', $aPrimary ) . " FROM " . $oTable->name );
+	} // getAll
+
 	// - implements:ArrayAccess
 	public function offsetSet( $mOffset, $mValue ) { $this->$mOffset = $mValue; }
     public function offsetExists( $mOffset ) { return isset( $this->$mOffset ); }
