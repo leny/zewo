@@ -89,17 +89,21 @@ class Template {
 		if( is_null( $sFileToLoad ) )
 			throw new \InvalidArgumentException( "There is no file attribute for {include} !" );
 		$sCode  = '<?php ' . "\n";
-		foreach( $aAdditionalVars as $sAdditionalVar )
+		$sCode .= '$storeFor' . $this->_sCacheName . ' = array();' . "\n";
+		foreach( $aAdditionalVars as $sVarName => $sAdditionalVar ) {
+			$sCode .= '$storeFor' . $this->_sCacheName . '[ \'' . $sVarName . '\' ] = ' . $sVarName . ';' . "\n";
 			$sCode .= $sAdditionalVar . "\n";
+		}
 		$sCode .= '?> ' . "\n";
-		// TODO : avoid recursivity
 		$oTemplate = new \Zewo\Templates\Template( $sFileToLoad );
 		$oTemplate->generate( $this->_sCacheID );
 		$sCode .= '<?php include( "' . $oTemplate->opcodePath . '" ); ?>' . "\n";
-
 		$sCode .= '<?php ' . "\n";
-		foreach( $aAdditionalVars as $sVarName => $sAdditionalVar )
+		foreach( $aAdditionalVars as $sVarName => $sAdditionalVar ) {
 			$sCode .= 'unset( ' . $sVarName . ' );' . "\n";
+			$sCode .= $sVarName . ' = $storeFor' . $this->_sCacheName . '[ \'' . $sVarName . '\' ];' . "\n";
+		}
+		$sCode .= 'unset( $storeFor' . $this->_sCacheName . ' );' . "\n";
 		$sCode .= '?> ' . "\n";
 		return $sCode;
 	} // _parseIncludeBlock

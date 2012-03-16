@@ -5,8 +5,6 @@
 
 namespace Zewo\Templates;
 
-// TODO : temporary assigns (for fetches and others)
-
 class Templating extends \Zewo\Tools\Singleton {
 
 	public function assign( $sName, $mValue ) {
@@ -16,7 +14,7 @@ class Templating extends \Zewo\Tools\Singleton {
 	public function assignByRef( $sName, &$mValue ) {
 		$this->_aAssignedVariables[ $sName ] = $mValue;
 	} // assignByRef
-	
+
 	public function getAssignedVariable( $sName ) {
 		return isset( $this->_aAssignedVariables[ $sName ] ) ? $this->_aAssignedVariables[ $sName ] : null ;
 	} // getAssignedVariable
@@ -42,7 +40,7 @@ class Templating extends \Zewo\Tools\Singleton {
 	protected function __construct() {
 		$this->_oZewo = \Zewo\Zewo::getInstance();
 	} // __construct
-	
+
 	private function _assignFetches( $aFetches = array() ) {
 		if( !is_array( $aFetches ) || !sizeof( $aFetches ) )
 			return;
@@ -55,7 +53,7 @@ class Templating extends \Zewo\Tools\Singleton {
 			$this->_aRegisteredTemplates[ $sTPLPath ] = new Template( $sTPLPath );
 		return $this->_aRegisteredTemplates[ $sTPLPath ];
 	} // _getTemplate
-	
+
 	private function _generateAssignedVars() {
 		$sCode  = '<?php ' . "\n";
 		foreach( $this->_aAssignedVariables as $sName => $mValue )
@@ -65,8 +63,8 @@ class Templating extends \Zewo\Tools\Singleton {
 	} // _generateAssignedVars
 
 	private function _getTemplateFile( $sTPLPath, $sCacheID = null ) {
-		$sTemplateFilePath = $this->_oZewo->config->get( 'template.folders.cache' ) . md5( md5_file( $sTPLPath ) . $sCacheID ) . '.tpc';
-		$sTPLFileContent  = $this->generateAssignedVars();
+		$sTemplateFilePath = $this->_oZewo->config->get( 'template.folders.cache' ) . md5( md5_file( $this->_oZewo->config->get( 'template.folders.templates' ) . $sTPLPath ) . $sCacheID ) . '.tpc';
+		$sTPLFileContent  = $this->_generateAssignedVars();
 		$sTPLFileContent .= $this->_getTemplate( $sTPLPath )->render( $sCacheID );
 		if( !file_put_contents( $sTemplateFilePath, $sTPLFileContent ) )
 			throw new RuntimeException( 'The template file "' . $sTemplateFilePath . '" cannot be written !' );
