@@ -38,11 +38,11 @@ class Template {
 	} // render
 
 	private function _existsInOpcode() {
-		return in_array( $this->_sCacheName, self::$_aCompiledTemplates ) || file_exists( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' );
+		return in_array( $this->_sCacheName, self::$_aCompiledTemplates ) || file_exists( $this->_sOpCodePath );
 	} // _existsInOpcode
 
 	private function _getFromOpcode() {
-		return file_get_contents( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' );
+		return file_get_contents( $this->_sOpCodePath );
 	} // _getFromOpcode
 
 	private function _generateOpcode() {
@@ -60,9 +60,7 @@ class Template {
 		// inline elements
 		$this->_replaceExpressions();
 
-		$this->_oZewo->utils->trace( $this->_sOpCodeContent );
-
-		file_put_contents( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' , $this->_sOpCodeContent );
+		file_put_contents( $this->_sOpCodePath, $this->_sOpCodeContent );
 	} // _generateOpcode
 
 	private function _initOpcode( $sOpcodeID ) {
