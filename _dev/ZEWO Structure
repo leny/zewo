@@ -22,9 +22,9 @@ DONE : $zewo->route->redirect( path )
 
 TEMPLATES methods
 
-$zewo->template->assign( name, value )
+DONE : $zewo->template->assign( name, value )
 
-$zewo->template->fetch( template )
+DONE : $zewo->template->fetch( template )
 
 DONE : $zewo->template->display( template, [ var => template ] )
 
