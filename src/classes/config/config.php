@@ -16,8 +16,12 @@ class Config extends \Zewo\Tools\Singleton {
 		return $aCurrent;
 	} // get
 
-	public function apply( $aConfig ) {
+	public function apply( $aConfig, $sPathBase = null ) {
 		$this->_aData = array_merge( $this->_aDefault, $aConfig );
+		if( !is_null( $sPathBase ) ) {
+			$this->_aData[ 'template' ][ 'folders' ][ 'cache' ] = $sPathBase . $this->_aData[ 'template' ][ 'folders' ][ 'cache' ];
+			$this->_aData[ 'template' ][ 'folders' ][ 'templates' ] = $sPathBase . $this->_aData[ 'template' ][ 'folders' ][ 'templates' ];
+		}
 	} // apply
 
 	private $_aData = array();
@@ -43,8 +47,8 @@ class Config extends \Zewo\Tools\Singleton {
 		'template' => array(
 			'cache' => false,
 			'folders' => array(
-				'cache' => './cache/',
-				'templates' => './templates/',
+				'cache' => 'cache/',
+				'templates' => 'templates/',
 			),
 		),
 	);
