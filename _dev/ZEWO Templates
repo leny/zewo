@@ -1,0 +1,19 @@
+ZEWO Templates
+
+Les templates de zewo doivent fonctionner un peu comme smarty, mais on a pas forcément besoin de tout ce qu'il y a dans smarty.
+
+TODO :
+
+- assigning variables
+- {$variable}															OK
+- generate opcoded version												OK
+- render																OK
+- {$variable.item.item}													OK
+- {#CONSTANTE}															OK
+- {$variable|function}													OK
+- {$variable|function:params}											OK
+- {if CONDITION}{elseif CONDITION}{else}{/if}							OK
+- {foreach $array as $item}{foreachelse}{/foreach}						OK
+- {include}																OK
+- {ldelim} {rdelim}
+- create new blocks
