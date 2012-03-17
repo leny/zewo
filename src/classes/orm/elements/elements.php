@@ -95,7 +95,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 	public function filter( $mFilter, $mFilterValue=null ) {
 		if( is_null( $mFilterValue ) && !is_array( $mFilter ) )
-			trigger_error( "If filter is alone, it must be an Array !", E_USER_ERROR );
+			throw new \InvalidArgumentException( "If filter is alone, it must be an Array !" );
 		else if( !is_null( $mFilterValue ) && !is_array( $mFilter ) )
 			$mFilter = array( $mFilter => $mFilterValue );
 		$this->_aSavedStateOfElements[] = $this->_aElements;

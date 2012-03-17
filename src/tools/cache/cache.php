@@ -15,7 +15,7 @@ abstract class Cache {
 				return \Zewo\Tools\Cache\APC::getInstance();
 				break;
 			default:
-				return false && trigger_error( 'Unknown Cache Type "' . $sType . '" !' );
+				throw new \InvalidArgumentException( 'Unknown Cache Type "' . $sType . '" !' );
 				break;
 		}
 	} // getInstanceOf

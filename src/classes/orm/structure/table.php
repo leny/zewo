@@ -31,7 +31,7 @@ final class Table extends \Zewo\Tools\Cached {
 		$this->_sTable = $sTable;
 		if( !$this->_getFromCache( $this->_sTable ) )
 			if( !$this->_buildTableInfos() )
-				return false && trigger_error( 'Unknown table "' . $this->_sTable . '" in base "' . $this->_sBase . '" !', E_USER_ERROR );
+				throw new \InvalidArgumentException( 'Unknown table "' . $this->_sTable . '" in base "' . $this->_sBase . '" !' );
 		return $this;
 	} // __construct
 
