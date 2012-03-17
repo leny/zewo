@@ -19,14 +19,15 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		} elseif( in_array( $sName, array_keys( $this->_aDynamicData ) ) )
 			return $this->_aDynamicData[$sName];
 		else
-			return null && trigger_error( 'The property "' . $sName . '" doesn\'t exists in ' . get_called_class() . '.', E_USER_NOTICE );
+			throw new \InvalidArgumentException( 'The property "' . $sName . '" doesn\'t exists in ' . get_called_class() . '.' );
 	} // __get
 
 	public function __set( $sName, $mValue ) {
 		if( in_array( $sName, array_keys( $this->_oStructure->columns ) ) ) {
 			if( $this->_oStructure->getColumn( $sName )->isForeign() ) {
 				if( is_null( $mValue ) ) {
-					// TODO: checking isNullable ?
+					if( !$this->_oStructure->getColumn( $sName )->isNullable() )
+						throw new \UnexpectedValueException( 'The property "' . $sName . '" of "' . get_called_class() . '" can\'t be nullable !' );
 					$this->_aColumnsData[$sName] = null;
 				} else {
 					$sForeignClassName = \Zewo\Zewo::getInstance()->utils->convertor->fromTableNameToClassName( $this->_oStructure->getColumn( $sName )->foreignTable->table );
@@ -34,13 +35,13 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 						$sForeignColumn = $this->_oStructure->getColumn( $sName )->foreignColumn->name;
 						$mValue = new $sForeignClassName( array( $sForeignColumn => $mValue ) );
 						if( $mValue->isNew() )
-							trigger_error( 'The property "' . $sName . '" of "' . get_called_class() . '" must be an instance of "' . $sForeignClassName . '". The convertor has failed to create an instance of "' . $sForeignClassName . '" with given value.', E_USER_ERROR );
+							throw new \UnexpectedValueException( 'The property "' . $sName . '" of "' . get_called_class() . '" must be an instance of "' . $sForeignClassName . '". The convertor has failed to create an instance of "' . $sForeignClassName . '" with given value.' );
 					}
 					if( $mValue->getStructure()->table == $this->_oStructure->getColumn( $sName )->foreignTable->table )
 						$this->_setSubClass($sName, $mValue);
 				}
 			} elseif( $this->_oStructure->isPrimary( $sName ) )
-				trigger_error( 'You can\'t affect a new value to "' . $sName . '" : column is a primary key of table "' . $this->_oStructure->table . '" !', E_USER_ERROR );
+				throw new \UnexpectedValueException( 'You can\'t set a new value to "' . $sName . '" : column is a primary key of table "' . $this->_oStructure->table . '" !' );
 			else
 				$this->_aColumnsData[$sName] = $mValue;
 		} else
@@ -148,7 +149,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
     			$oColumn = $this->_oStructure->getColumn( $sKey );
     			if( $oColumn->isForeign() ) {
     				if( !is_subclass_of( $mValue, 'Element' ) )
-    					return false && trigger_error( $sKey . " must be a subclass of Element !" );
+    					throw new \UnexpectedValueException( $sKey . " must be a subclass of Element !" );
     				$sForeignProperty = $oColumn->foreignColumn->name;
     				$aSearchClause[] = '`' . $this->_oStructure->table . '`.`' . $sKey."` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $mValue->$sForeignProperty, $oColumn ) . "";
     			} else
@@ -265,7 +266,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 
 	protected function _getSubClass( Column $oColumn ) {
 		if( !$oColumn->isForeign() )
-			return false && trigger_error( 'This should never append : calling internal _getSubClass method for a property not foreigned. Post issue on github, please. Thanks.', E_USER_ERROR );
+			throw new \LogicException( 'This should never append : calling internal _getSubClass method for a property not foreigned. Post issue on github, please. Thanks.' );
 		if( $oColumn->isNullable() && is_null( $this->_aColumnsData[ $oColumn->name ] ) )
 			return null;
 		if( !isset( $this->_aSubClassesData[ $oColumn->name ] ) ) {

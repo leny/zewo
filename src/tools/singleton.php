@@ -15,7 +15,7 @@ class Singleton {
 	} // getInstance
 
 	final public function __clone() {
-		trigger_error( "Le clonage d'un singleton n'est pas autorisé.", E_USER_ERROR );
+		throw new \BadMethodCallException( "Le clonage d'un singleton n'est pas autorisé." );
 	} // __clone
 
 	protected function __construct() {} // __construct

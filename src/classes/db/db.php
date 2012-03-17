@@ -53,7 +53,7 @@ class db extends \Zewo\Tools\Singleton {
 	public function addConnexion( $sName, $sHost, $sLogin, $sPass, $bSelect=false ) {
 		$rConnexion = mysqli_connect($sHost, $sLogin, $sPass);
 		if( !$rConnexion )
-			return false && trigger_error( 'MySQL Connexion Error (' . mysqli_connect_errno() . ' : ' . mysqli_connect_error() . ')', E_USER_ERROR );
+			throw new \InvalidArgumentException( 'MySQL Connexion Error (' . mysqli_connect_errno() . ' : ' . mysqli_connect_error() . ')' );
 		if( isset( $this->_aConnexions[ $sName ] ) )
 			trigger_error( 'MySQL Connexion link named "' . $sName . '" has been overwrited.', E_USER_NOTICE );
 		$this->_aConnexions[ $sName ] = $rConnexion;
@@ -62,7 +62,7 @@ class db extends \Zewo\Tools\Singleton {
 
 	public function selectConnexion( $sName ) {
 		if( !isset( $this->_aConnexions[ $sName ] ) )
-			return false && trigger_error( 'MySQL Connexion link named "' . $sName . '" doesn\'t exists !', E_USER_ERROR );
+			throw new \InvalidArgumentException( 'MySQL Connexion link named "' . $sName . '" doesn\'t exists !' );
 		$this->_sCurrentConnexionName = $sName;
 		return $this->currentConnexion;
 	} // selectConnexion
@@ -76,10 +76,10 @@ class db extends \Zewo\Tools\Singleton {
 
 	public function selectDatabase( $sName ) {
 		if( !isset( $this->_aDatabases[ $sName ] ) )
-			return false && trigger_error( 'MySQL Database link named "' . $sName . '" doesn\'t exists !', E_USER_ERROR );
+			throw new \InvalidArgumentException( 'MySQL Database link named "' . $sName . '" doesn\'t exists !' );
 		$bOperation = mysqli_select_db( $this->currentConnexion, $this->_aDatabases[ $sName ] );
 		if( !$bOperation )
-			return false && trigger_error( 'MySQL Database "' . $sBase . '" Selection Error', E_USER_ERROR );
+			throw new \InvalidArgumentException( 'MySQL Database "' . $sBase . '" Selection Error' );
 		$this->_sCurrentDatabaseName = $sName;
 		return $this->currentDatabase;
 	} // selectConnexion
@@ -135,7 +135,7 @@ class db extends \Zewo\Tools\Singleton {
 		}
 		if( gettype( $mData ) == 'boolean' ) {
 			if( mysqli_errno( $this->currentConnexion ) )
-				return false && trigger_error( $this->_getErrorMessage(), E_USER_ERROR );
+				throw new \Exception( $this->_getErrorMessage() );
 			return true;
 		}
 		$aArray = array();
