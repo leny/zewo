@@ -55,7 +55,6 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 	} // __set
 
 	public function __construct( $sTargetClass, $sQuery ) {
-		$this->_oZewo = \Zewo\Zewo::getInstance();
 		$this->_sTargetClass = 'namespace\\' . $sTargetClass;
 		if( !$this->_getFromCache( $this->_getCacheKey( $sQuery ) ) )
 			$this->_load( $sQuery );

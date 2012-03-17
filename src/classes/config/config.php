@@ -37,7 +37,7 @@ class Config extends \Zewo\Tools\Singleton {
 		// ORM
 		'orm' => array(
 			'cacheKey' => 'noCacheKey',
-			'baseClass' => '\Zewo\ORM\Elements\Element',
+			'baseClass' => '\Zewo\Extendeds\Elements\Element',
 		),
 		// TEMPLATES
 		'template' => array(
