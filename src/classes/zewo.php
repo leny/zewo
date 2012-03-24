@@ -59,18 +59,18 @@ class Zewo extends Tools\Singleton {
 		}
 	} // __call
 
-	public function init( $mConfig=null ) {
+	public function init( $mConfig=null, $sPathBase = null ) {
 		if( is_array( $mConfig ) ) {
 			$aConfig = $mConfig;
 		} elseif( file_exists( $mConfig ) ) {
 			$aConfig = json_decode( file_get_contents( $mConfig ), true ) ?: array();
 		}
-		$this->_applyConfig( $aConfig );
+		$this->_applyConfig( $aConfig, $sPathBase );
 	} // init
 
-	private function _applyConfig( $aConfig ) {
+	private function _applyConfig( $aConfig, $sPathBase ) {
 		$this->_oConfig = Config\Config::getInstance();
-		$this->_oConfig->apply( $aConfig );
+		$this->_oConfig->apply( $aConfig, $sPathBase );
 		$this->_oRouting = Routing\Router::getInstance();
 		$this->_oUtils = Utils\Utils::getInstance();
 		// db
