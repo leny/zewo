@@ -20,7 +20,7 @@ abstract class Element extends \Zewo\ORM\Elements\Element {
 	public function store( $sKey ) {
 		if( is_null( $sKey ) )
 			return false && trigger_error( "Tentative de stockage d'un object [" . get_called_class() . "] sans clé.", E_USER_NOTICE );
-		session( $sKey, serialize( \Zewo\Zewo::getInstance()->globals->session( $sKey ) ) );
+		\Zewo\Zewo::getInstance()->globals->session( $sKey, serialize( $this ) );
 	} // store
 
 	public function assign( $sName ) {

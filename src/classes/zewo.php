@@ -43,6 +43,14 @@ class Zewo extends Tools\Singleton {
 
 	public function __call( $sName, $aArguments ) {
 		switch( $sName ) {
+			// TEMPLATE shortcuts
+			case 'assign':
+			case 'fetch':
+			case 'display':
+			case 'close':
+			case 'clearCache':
+				call_user_func_array( array( $this->template, $sName ), $aArguments );
+				break;
 			// ROUTING shortcuts
 			case 'run':
 			case 'post':
