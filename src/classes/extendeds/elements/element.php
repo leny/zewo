@@ -3,7 +3,7 @@
  * /classes/extendeds/elements/element.php
  */
 
-namespace \Zewo\Extendeds\Elements;
+namespace Zewo\Extendeds\Elements;
 
 abstract class Element extends \Zewo\ORM\Elements\Element {
 
