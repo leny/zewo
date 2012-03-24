@@ -155,7 +155,6 @@ class Template {
 		// var
 		$aVarParts = explode( '|', $sPart );
 		$sVarName = $this->_parseVar( array_shift( $aVarParts ) );
-		$this->_registerVar( $sVarName );
 		if( sizeof( $aVarParts ) )
 			$sVarName = $this->_applyFunctionToVarExpression( $sVarName, $aVarParts );
 		return $sVarName;
@@ -168,6 +167,7 @@ class Template {
 	private function _parseVar( $sVarName ) {
 		$aVarComponents = preg_split( '/(\.|\-\>|\[.+\])/', $sVarName, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
 		$sVarName = '';
+		$this->_registerVar( $aVarComponents[ 0 ] );
 		for( $i = -1, $l = sizeof( $aVarComponents ); ++$i < $l; ) {
 			if( $aVarComponents[ $i ] == '.' )
 				$sVarName .= "[ '" . $aVarComponents[ ++$i ] . "' ]";
@@ -192,6 +192,9 @@ class Template {
 		if( $sVarName{ 0 } == '$' ) {
 			if( !in_array( $sVarName , $this->_aEncounteredVars ) )
 				$this->_aEncounteredVars[] = $sVarName;
+		} elseif( $sVarName{ 0 } == '!' && $sVarName{ 1 } == '$' ) {
+			if( !in_array( substr( $sVarName, 1 ) , $this->_aEncounteredVars ) )
+				$this->_aEncounteredVars[] = substr( $sVarName, 1 );
 		} else {
 			if( !in_array( $sVarName , $this->_aEncounteredConstants ) )
 				$this->_aEncounteredConstants[] = $sVarName;
