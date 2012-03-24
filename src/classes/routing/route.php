@@ -12,7 +12,7 @@ class Route {
 		$this->_aAllowedMethods = $aMethods;
 		foreach( $aCallbacks as $cCallback ) {
 			if( !is_callable( $cCallback ) )
-				throw new InvalidArgumentException( "A route middleware must be callable !" );
+				throw new \InvalidArgumentException( "A route middleware must be callable !" );
 			$this->_aCallbacks[] = $cCallback;
 		}
 		$this->_bIsAJAX = $bIsAJAX;
