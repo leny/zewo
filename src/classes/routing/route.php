@@ -35,9 +35,9 @@ class Route {
 		if( $this->_matchURL( $sURI ) ) {
 			global $zewo;
 			if( !$this->_matchMethod() )
-				$zewo->route->callError( 405 );
+				return false;
 			if( !$this->_matchAJAX() )
-				$zewo->route->callError( 406 );
+				return false;
 			return true;
 		} else
 			return false;
