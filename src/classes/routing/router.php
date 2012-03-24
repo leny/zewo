@@ -48,7 +48,7 @@ class Router extends \Zewo\Tools\Singleton {
 	} // redirect
 
 	public function run() {
-		$this->_sCurrentURI = $_SERVER[ 'REQUEST_URI' ];
+		$this->_sCurrentURI = $_SERVER[ 'REDIRECT_URL' ];
 		$bHasMatched = false;
 		foreach( $this->_aRegisteredRoutes as $oRoute ) {
 			if( $oRoute->match( $this->_sCurrentURI ) ) {

@@ -264,7 +264,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 			return $this->_oStructure->primary->name . "` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->_aColumnsData[ $this->_oStructure->primary->name ], $this->_oStructure->primary );
 	} // _getWhereClause
 
-	protected function _getSubClass( Column $oColumn ) {
+	protected function _getSubClass( \Zewo\ORM\Structure\Column $oColumn ) {
 		if( !$oColumn->isForeign() )
 			throw new \LogicException( 'This should never append : calling internal _getSubClass method for a property not foreigned. Post issue on github, please. Thanks.' );
 		if( $oColumn->isNullable() && is_null( $this->_aColumnsData[ $oColumn->name ] ) )
@@ -292,8 +292,6 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		return json_encode( $oExport );
 	} // _jsonize
 
-	protected $_oStructure;
-
 	protected $_bNew = true;
 
 	protected $_aColumnsData = array();
@@ -303,6 +301,8 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 	protected $_sCacheKey;
 
 	protected $_mOriginalQuery;
+
+	protected $_oStructure;
 
 	private function _getCacheKey( $mParams = null ) {
 		if( !is_null( $this->_sCacheKey ) ) {
