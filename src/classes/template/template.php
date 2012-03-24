@@ -47,8 +47,7 @@ class Template {
 
 	private function _generateOpcode() {
 		self::$_aCompiledTemplates[] = $this->_sCacheName;
-		$this->_sOpCodeContent  = '<?php /* ZEWO Opcode Template : ' . $this->_sCacheName . ' */ ?>' . "\n";
-		$this->_sOpCodeContent .= file_get_contents( $this->_sTPLPath );
+		$this->_sOpCodeContent = file_get_contents( $this->_sTPLPath );
 
 		// parse includes
 		$this->_sOpCodeContent = $this->_replaceIncludes( $this->_sOpCodeContent );
@@ -60,13 +59,27 @@ class Template {
 		// inline elements
 		$this->_replaceExpressions();
 
-		file_put_contents( $this->_sOpCodePath, $this->_sOpCodeContent );
+		$sGeneratedContent  = '<?php /* ZEWO Opcode Template : ' . $this->_sCacheName . ' */ ?>' . "\n";
+		$sGeneratedContent .= $this->_generatingVarsDeclarations();
+		$sGeneratedContent .= $this->_sOpCodeContent;
+
+		file_put_contents( $this->_sOpCodePath, $sGeneratedContent );
 	} // _generateOpcode
 
 	private function _initOpcode( $sOpcodeID ) {
 		$this->_sOpCodeContent  = '<?php /* ZEWO Opcode Template : ' . $sOpcodeID . ' */ ?>' . "\n";
 		$this->_sOpCodeContent .= $this->_sTemplateSource;
 	} // _initOpcode
+
+	private function _generatingVarsDeclarations() {
+		$sCode  = '<?php ' . "\n";
+		foreach( $this->_aEncounteredVars as $sVarName )
+			$sCode .= "\t" . '' . $sVarName . ' = isset( ' . $sVarName . ' ) ? ' . $sVarName . ' : null;' . "\n";
+		foreach( $this->_aEncounteredConstants as $sConstantName )
+			$sCode .= "\t" . 'defined( "' . $sConstantName . '" ) ?: define( "' . $sConstantName . '", null );' . "\n";
+		$sCode .= '?>' . "\n";
+		return $sCode;
+	} // _generatingVarsDeclarations
 
 	private function _replaceIncludes( $sSource ) {
 		return preg_replace_callback( $this->_sIncludeBlockRegex, array( $this, '_parseIncludeBlock' ), $sSource );
@@ -142,6 +155,7 @@ class Template {
 		// var
 		$aVarParts = explode( '|', $sPart );
 		$sVarName = $this->_parseVar( array_shift( $aVarParts ) );
+		$this->_registerVar( $sVarName );
 		if( sizeof( $aVarParts ) )
 			$sVarName = $this->_applyFunctionToVarExpression( $sVarName, $aVarParts );
 		return $sVarName;
@@ -173,6 +187,16 @@ class Template {
 		}
 		return $sVarName;
 	} // _applyFunctionToVarExpression
+
+	private function _registerVar( $sVarName ) {
+		if( $sVarName{ 0 } == '$' ) {
+			if( !in_array( $sVarName , $this->_aEncounteredVars ) )
+				$this->_aEncounteredVars[] = $sVarName;
+		} else {
+			if( !in_array( $sVarName , $this->_aEncounteredConstants ) )
+				$this->_aEncounteredConstants[] = $sVarName;
+		}
+	} // _registerVar
 
 	private function _replaceIfs() {
 		$this->_sOpCodeContent = preg_replace_callback( $this->_sIfBlocksOpenRegex, array( $this, '_parseIfBlockOpen' ), $this->_sOpCodeContent );
@@ -239,6 +263,9 @@ class Template {
 	private $_sCacheID = '';
 
 	private $_oZewo;
+
+	private $_aEncounteredVars = array();
+	private $_aEncounteredConstants = array();
 
 	private static $_aCompiledTemplates = array();
 
