@@ -7,6 +7,12 @@ namespace Zewo\Templates;
 
 class Templating extends \Zewo\Tools\Singleton {
 
+	public function clearCache() {
+		$aCachedFiles = glob( $this->_oZewo->config->get( 'template.folders.cache' ) . '*.t*c' );
+		foreach( $aCachedFiles as $sFile)
+			unlink( $sFile );
+	} // clearCache
+
 	public function assign( $sName, $mValue ) {
 		$this->_aAssignedVariables[ $sName ] = $mValue;
 	} // assign
