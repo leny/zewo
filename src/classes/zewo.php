@@ -46,6 +46,7 @@ class Zewo extends Tools\Singleton {
 			// TEMPLATE shortcuts
 			case 'assign':
 			case 'fetch':
+			case 'fetchTo':
 			case 'display':
 			case 'close':
 			case 'clearCache':
