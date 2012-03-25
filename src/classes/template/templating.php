@@ -25,6 +25,10 @@ class Templating extends \Zewo\Tools\Singleton {
 		return isset( $this->_aAssignedVariables[ $sName ] ) ? $this->_aAssignedVariables[ $sName ] : null ;
 	} // getAssignedVariable
 
+	public function fetchTo( $sName, $sTPLPath, $sCacheID = null ) {
+		$this->assign( $sName, $this->fetch( $sTPLPath, $sCacheID ) );
+	} // fetchTo
+
 	public function fetch( $sTPLPath, $sCacheID = null ) {
 		$sTemplateFilePath = $this->_getTemplateFile( $sTPLPath, $sCacheID );
 		ob_start();
