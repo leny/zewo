@@ -135,14 +135,13 @@ class Template {
 	} // _parseExpressionBlock
 
 	private function _parseExpression( $sExpression ) {
-		$sExpressionAfter = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1 );
-		if( $sExpression == $sExpressionAfter )
+		$sExpressionAfter = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1, $iCount );
+		if( $sExpression == $sExpressionAfter && $iCount == 0 )
 			$sExpressionAfter = $this->_parseExpressionPart( $sExpressionAfter );
 		return $sExpressionAfter;
 	} // _parseExpression
 
 	private function _parseExpressionParts( $aMatches ) {
-
 		$sExpression  = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 1 ] ) ) );
 		$sExpression .= ' ' . trim( $aMatches[ 2 ] ) . ' ';
 		$sExpression .= preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 3 ] ) ) );
@@ -189,6 +188,8 @@ class Template {
 	} // _applyFunctionToVarExpression
 
 	private function _registerVar( $sVarName ) {
+		if( ( $sVarName{0} == "'" && substr( $sVarName, -1 ) == "'" ) || ( $sVarName{0} == '"' && substr( $sVarName, -1 ) == '"' ) )
+			return;
 		if( $sVarName{ 0 } == '$' ) {
 			if( !in_array( $sVarName , $this->_aEncounteredVars ) )
 				$this->_aEncounteredVars[] = $sVarName;
