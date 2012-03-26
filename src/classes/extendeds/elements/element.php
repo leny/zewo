@@ -28,8 +28,8 @@ abstract class Element extends \Zewo\ORM\Elements\Element {
 		return $this;
 	} // assign
 
-	public static function get( $sQuery ) {
-		return new \Zewo\Extendeds\Elements\Elements( get_called_class(), $sQuery );
+	public static function get( $sQuery, $bFromCache = true ) {
+		return new \Zewo\Extendeds\Elements\Elements( get_called_class(), $sQuery, $bFromCache );
 	} // get
 
 } // class::Element
