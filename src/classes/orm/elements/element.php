@@ -118,11 +118,11 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		return $this->_bNew && empty( $this->_aColumnsData );
 	} // isNull
 
-	public static function get( $sQuery ) {
-		return new \Zewo\ORM\Elements\Elements( get_called_class(), $sQuery );
+	public static function get( $sQuery, $bFromCache = true ) {
+		return new \Zewo\ORM\Elements\Elements( get_called_class(), $sQuery, $bFromCache );
 	} // get
 
-	public static function getAll() {
+	public static function getAll( $bFromCache = true ) {
 		// build query
 		$oTable = new \Zewo\ORM\Structure\Table( \Zewo\Zewo::getInstance()->db->currentDatabase, \Zewo\Zewo::getInstance()->utils->convertor->fromClassNameToTableName( get_called_class() ) );
 		$aPrimary = array();
@@ -131,7 +131,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 				$aPrimary[] = $oColumn->name;
 		else
 			$aPrimary[] = $oTable->primary->name;
-		return self::get( "SELECT " . implode( ',', $aPrimary ) . " FROM " . $oTable->name );
+		return self::get( "SELECT " . implode( ',', $aPrimary ) . " FROM " . $oTable->name, $bFromCache );
 	} // getAll
 
 	// - implements:ArrayAccess

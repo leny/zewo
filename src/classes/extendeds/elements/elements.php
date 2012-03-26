@@ -7,8 +7,8 @@ namespace Zewo\Extendeds\Elements;
 
 class Elements extends \Zewo\ORM\Elements\Elements {
 
-	public function __construct( $sTargetClass, $sQuery ) {
-		return parent::__construct( $sTargetClass, $sQuery );
+	public function __construct( $sTargetClass, $sQuery, $bFromCache = true ) {
+		return parent::__construct( $sTargetClass, $sQuery, $bFromCache );
 	} // __construct
 
 	public function assign( $sName ) {
