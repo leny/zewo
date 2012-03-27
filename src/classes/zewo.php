@@ -59,6 +59,8 @@ class Zewo extends Tools\Singleton {
 			case 'map':
 			case 'error':
 			case 'redirect':
+			case 'callError':
+			case 'callErrorOn':
 				call_user_func_array( array( $this->route, $sName ), $aArguments );
 				break;
 			// UTILS shortcuts
