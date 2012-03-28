@@ -7,7 +7,7 @@ namespace Zewo\Utils;
 
 class Convertor extends \Zewo\Tools\Singleton {
 
-	public function fromDB( $mValue, Column $oColumn ) {
+	public function fromDB( $mValue, \Zewo\ORM\Structure\Column $oColumn ) {
 		if( ( is_null( $mValue ) || empty( $mValue ) ) && $oColumn->isNullable() )
 			return null;
 		switch( $oColumn->type ) {
@@ -46,7 +46,7 @@ class Convertor extends \Zewo\Tools\Singleton {
 		}
 	} // fromDB
 
-	public function toDB( $mValue, Column $oColumn, $bForCheck = false ) {
+	public function toDB( $mValue, \Zewo\ORM\Structure\Column $oColumn, $bForCheck = false ) {
 		if( ( is_null( $mValue ) || empty( $mValue ) ) && $oColumn->isNullable() )
 			return 'NULL';
 		if( $bForCheck && is_null( $mValue ) )

@@ -48,7 +48,7 @@ class Router extends \Zewo\Tools\Singleton {
 	} // redirect
 
 	public function run() {
-		$this->_sCurrentURI = $_SERVER[ 'REQUEST_URI' ];
+		$this->_sCurrentURI = $_SERVER[ 'REDIRECT_URL' ];
 		$bHasMatched = false;
 		foreach( $this->_aRegisteredRoutes as $oRoute ) {
 			if( $oRoute->match( $this->_sCurrentURI ) ) {
@@ -66,7 +66,7 @@ class Router extends \Zewo\Tools\Singleton {
 		foreach( $this->_aRegisteredErrorRoutes as $oErrorRoute ) {
 			if( $oErrorRoute->match( $iCode ) ) {
 				$bHasMatched = true;
-				$oErrorRoute->exec();
+				call_user_func_array( array( $oErrorRoute, 'exec' ) , array_slice( func_get_args(), 1 ) );
 				break;
 			}
 		}
@@ -74,6 +74,11 @@ class Router extends \Zewo\Tools\Singleton {
 			$this->_defaultErrorRouteHandler( 404 );
 		die();
 	} // callError
+
+	public function callErrorOn( $bAssertion, $iCode ) {
+		if( !$bAssertion ) return;
+		call_user_func_array( array( $this, 'callError' ), array_slice( func_get_args(), 1 ) );
+	} // callErrorOn
 
 	private function _registerRoute( $aParams, $aMethods, $bIsAJAX = false ) {
 		$aCallbacks = $aParams;

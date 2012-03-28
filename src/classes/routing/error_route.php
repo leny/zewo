@@ -23,7 +23,7 @@ class ErrorRoute {
 
 	public function exec() {
 		foreach( $this->_aCallbacks as $cCallback )
-			call_user_func_array( $cCallback, array( $_SERVER[ 'REQUEST_URI' ], $this->_iCode ) );
+			call_user_func_array( $cCallback, array_merge( array( $this->_iCode, $_SERVER[ 'REQUEST_URI' ] ), func_get_args() ) );
 	} // exec
 
 	private $_bIsAJAX = false;
