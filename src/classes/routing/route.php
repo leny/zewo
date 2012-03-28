@@ -12,7 +12,7 @@ class Route {
 		$this->_aAllowedMethods = $aMethods;
 		foreach( $aCallbacks as $cCallback ) {
 			if( !is_callable( $cCallback ) )
-				throw new InvalidArgumentException( "A route middleware must be callable !" );
+				throw new \InvalidArgumentException( "A route middleware must be callable !" );
 			$this->_aCallbacks[] = $cCallback;
 		}
 		$this->_bIsAJAX = $bIsAJAX;
@@ -35,9 +35,9 @@ class Route {
 		if( $this->_matchURL( $sURI ) ) {
 			global $zewo;
 			if( !$this->_matchMethod() )
-				$zewo->route->callError( 405 );
+				return false;
 			if( !$this->_matchAJAX() )
-				$zewo->route->callError( 406 );
+				return false;
 			return true;
 		} else
 			return false;

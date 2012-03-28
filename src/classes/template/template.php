@@ -38,17 +38,16 @@ class Template {
 	} // render
 
 	private function _existsInOpcode() {
-		return in_array( $this->_sCacheName, self::$_aCompiledTemplates ) || file_exists( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' );
+		return in_array( $this->_sCacheName, self::$_aCompiledTemplates ) || file_exists( $this->_sOpCodePath );
 	} // _existsInOpcode
 
 	private function _getFromOpcode() {
-		return file_get_contents( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' );
+		return file_get_contents( $this->_sOpCodePath );
 	} // _getFromOpcode
 
 	private function _generateOpcode() {
 		self::$_aCompiledTemplates[] = $this->_sCacheName;
-		$this->_sOpCodeContent  = '<?php /* ZEWO Opcode Template : ' . $this->_sCacheName . ' */ ?>' . "\n";
-		$this->_sOpCodeContent .= file_get_contents( $this->_sTPLPath );
+		$this->_sOpCodeContent = file_get_contents( $this->_sTPLPath );
 
 		// parse includes
 		$this->_sOpCodeContent = $this->_replaceIncludes( $this->_sOpCodeContent );
@@ -60,15 +59,27 @@ class Template {
 		// inline elements
 		$this->_replaceExpressions();
 
-		$this->_oZewo->utils->trace( $this->_sOpCodeContent );
+		$sGeneratedContent  = '<?php /* ZEWO Opcode Template : ' . $this->_sCacheName . ' */ ?>' . "\n";
+		$sGeneratedContent .= $this->_generatingVarsDeclarations();
+		$sGeneratedContent .= $this->_sOpCodeContent;
 
-		file_put_contents( $this->_oZewo->config->get( 'template.folders.cache' ) . $this->_sCacheName . '.toc' , $this->_sOpCodeContent );
+		file_put_contents( $this->_sOpCodePath, $sGeneratedContent );
 	} // _generateOpcode
 
 	private function _initOpcode( $sOpcodeID ) {
 		$this->_sOpCodeContent  = '<?php /* ZEWO Opcode Template : ' . $sOpcodeID . ' */ ?>' . "\n";
 		$this->_sOpCodeContent .= $this->_sTemplateSource;
 	} // _initOpcode
+
+	private function _generatingVarsDeclarations() {
+		$sCode  = '<?php ' . "\n";
+		foreach( $this->_aEncounteredVars as $sVarName )
+			$sCode .= "\t" . '' . $sVarName . ' = isset( ' . $sVarName . ' ) ? ' . $sVarName . ' : null;' . "\n";
+		foreach( $this->_aEncounteredConstants as $sConstantName )
+			$sCode .= "\t" . 'defined( "' . $sConstantName . '" ) ?: define( "' . $sConstantName . '", null );' . "\n";
+		$sCode .= '?>' . "\n";
+		return $sCode;
+	} // _generatingVarsDeclarations
 
 	private function _replaceIncludes( $sSource ) {
 		return preg_replace_callback( $this->_sIncludeBlockRegex, array( $this, '_parseIncludeBlock' ), $sSource );
@@ -89,17 +100,21 @@ class Template {
 		if( is_null( $sFileToLoad ) )
 			throw new \InvalidArgumentException( "There is no file attribute for {include} !" );
 		$sCode  = '<?php ' . "\n";
-		foreach( $aAdditionalVars as $sAdditionalVar )
+		$sCode .= '$storeFor' . $this->_sCacheName . ' = array();' . "\n";
+		foreach( $aAdditionalVars as $sVarName => $sAdditionalVar ) {
+			$sCode .= '$storeFor' . $this->_sCacheName . '[ \'' . $sVarName . '\' ] = ' . $sVarName . ';' . "\n";
 			$sCode .= $sAdditionalVar . "\n";
+		}
 		$sCode .= '?> ' . "\n";
-		// TODO : avoid recursivity
 		$oTemplate = new \Zewo\Templates\Template( $sFileToLoad );
 		$oTemplate->generate( $this->_sCacheID );
 		$sCode .= '<?php include( "' . $oTemplate->opcodePath . '" ); ?>' . "\n";
-
 		$sCode .= '<?php ' . "\n";
-		foreach( $aAdditionalVars as $sVarName => $sAdditionalVar )
+		foreach( $aAdditionalVars as $sVarName => $sAdditionalVar ) {
 			$sCode .= 'unset( ' . $sVarName . ' );' . "\n";
+			$sCode .= $sVarName . ' = $storeFor' . $this->_sCacheName . '[ \'' . $sVarName . '\' ];' . "\n";
+		}
+		$sCode .= 'unset( $storeFor' . $this->_sCacheName . ' );' . "\n";
 		$sCode .= '?> ' . "\n";
 		return $sCode;
 	} // _parseIncludeBlock
@@ -120,14 +135,13 @@ class Template {
 	} // _parseExpressionBlock
 
 	private function _parseExpression( $sExpression ) {
-		$sExpressionAfter = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1 );
-		if( $sExpression == $sExpressionAfter )
+		$sExpressionAfter = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1, $iCount );
+		if( $sExpression == $sExpressionAfter && $iCount == 0 )
 			$sExpressionAfter = $this->_parseExpressionPart( $sExpressionAfter );
 		return $sExpressionAfter;
 	} // _parseExpression
 
 	private function _parseExpressionParts( $aMatches ) {
-
 		$sExpression  = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 1 ] ) ) );
 		$sExpression .= ' ' . trim( $aMatches[ 2 ] ) . ' ';
 		$sExpression .= preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 3 ] ) ) );
@@ -152,6 +166,7 @@ class Template {
 	private function _parseVar( $sVarName ) {
 		$aVarComponents = preg_split( '/(\.|\-\>|\[.+\])/', $sVarName, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
 		$sVarName = '';
+		$this->_registerVar( $aVarComponents[ 0 ] );
 		for( $i = -1, $l = sizeof( $aVarComponents ); ++$i < $l; ) {
 			if( $aVarComponents[ $i ] == '.' )
 				$sVarName .= "[ '" . $aVarComponents[ ++$i ] . "' ]";
@@ -171,6 +186,21 @@ class Template {
 		}
 		return $sVarName;
 	} // _applyFunctionToVarExpression
+
+	private function _registerVar( $sVarName ) {
+		if( ( $sVarName{0} == "'" && substr( $sVarName, -1 ) == "'" ) || ( $sVarName{0} == '"' && substr( $sVarName, -1 ) == '"' ) )
+			return;
+		if( $sVarName{ 0 } == '$' ) {
+			if( !in_array( $sVarName , $this->_aEncounteredVars ) )
+				$this->_aEncounteredVars[] = $sVarName;
+		} elseif( $sVarName{ 0 } == '!' && $sVarName{ 1 } == '$' ) {
+			if( !in_array( substr( $sVarName, 1 ) , $this->_aEncounteredVars ) )
+				$this->_aEncounteredVars[] = substr( $sVarName, 1 );
+		} else {
+			if( !in_array( $sVarName , $this->_aEncounteredConstants ) )
+				$this->_aEncounteredConstants[] = $sVarName;
+		}
+	} // _registerVar
 
 	private function _replaceIfs() {
 		$this->_sOpCodeContent = preg_replace_callback( $this->_sIfBlocksOpenRegex, array( $this, '_parseIfBlockOpen' ), $this->_sOpCodeContent );
@@ -203,7 +233,7 @@ class Template {
 		// has foreachelse ?
 		if( isset( $aMatches[ 3 ] ) && strpos( $aMatches[ 3 ], '{foreachelse}' ) !== false )
 			$sCode .= '<?php if( !isset( ' . $aParameters[ 'from' ] . ' ) || sizeof( ' . $aParameters[ 'from' ] . ' ) === 0 ): ?>' . "\n";
-		$sCode .= '<?php $' . $aParameters[ 'name' ] . '_index = 0; foreach( ' . $aParameters[ 'from' ] . ' as $' . $aParameters[ 'key' ] . ' => &$' . $aParameters[ 'item' ] . ' ): ' . "\n";
+			$sCode .= '<?php $' . $aParameters[ 'name' ] . '_index = 0; foreach( ' . $aParameters[ 'from' ] . ' as $' . $aParameters[ 'key' ] . ' => $' . $aParameters[ 'item' ] . ' ): ' . "\n";
 			$sCode .= "\t" . '$' . $aParameters[ 'name' ] . ' = array(' . "\n";
 			$sCode .= "\t\t" . '"index" => $' . $aParameters[ 'name' ] . '_index,' . "\n";
 			$sCode .= "\t\t" . '"iteration" => $' . $aParameters[ 'name' ] . '_index + 1,' . "\n";
@@ -237,6 +267,9 @@ class Template {
 	private $_sCacheID = '';
 
 	private $_oZewo;
+
+	private $_aEncounteredVars = array();
+	private $_aEncounteredConstants = array();
 
 	private static $_aCompiledTemplates = array();
 
