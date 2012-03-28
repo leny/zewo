@@ -178,6 +178,12 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 			$this->_aPagesElements = $this->_aElements;
 	} // _paginate
 
+	protected function _getCacheKey( $sQuery ) {
+		if( is_null( $this->_sCacheKey ) )
+			parent::_getCacheKey( md5( $sQuery ) );
+		return $this->_sCacheKey;
+	} // _getCacheKey
+
 	protected $_iPosition = 0;
 
 	protected $_sLoadQuery;
@@ -194,11 +200,5 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 	protected $_iPageSize = 10;
 	protected $_iCurrentPage = 1;
-
-	private function _getCacheKey( $sQuery ) {
-		if( is_null( $this->_sCacheKey ) )
-			$this->_setCacheKey( md5( $sQuery ) );
-		return $this->_sCacheKey;
-	} // _getCacheKey
 
 } // class::Elements
