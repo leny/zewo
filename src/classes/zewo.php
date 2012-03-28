@@ -67,6 +67,11 @@ class Zewo extends Tools\Singleton {
 			case 'load':
 				call_user_func_array( array( $this->utils, $sName ), $aArguments );
 				break;
+			default:
+				if( !array_key_exists( $sName, $this->_aDynamicMethods ) )
+					throw new \InvalidArgumentException( 'There is no dynamic method called "' . $sName . '" !' );
+				call_user_func_array( $this->_aDynamicMethods[ $sName ], $aArguments );
+				break;
 		}
 	} // __call
 
@@ -78,6 +83,14 @@ class Zewo extends Tools\Singleton {
 		}
 		$this->_applyConfig( $aConfig, $sPathBase );
 	} // init
+
+	public function registerMethod( $sMethod, $cCallback ) {
+		if( in_array( $sMethod, $this->_aReservedMethodsNames ) )
+			throw new \InvalidArgumentException( 'Method "' . $sMethod . '" already exists in zewo !' );
+		if( !is_callable( $cCallback ) )
+			throw new \InvalidArgumentException( 'Given callback method for "' . $sMethod . '" is not callable !' );
+		$this->_aDynamicMethods[ $sMethod ] = $cCallback;
+	} // registerMethod
 
 	private function _applyConfig( $aConfig, $sPathBase ) {
 		$this->_oConfig = Config\Config::getInstance();
@@ -102,5 +115,8 @@ class Zewo extends Tools\Singleton {
 	private $_oConfig;
 	private $_oCache;
 	private $_oORM;
+
+	private $_aReservedMethodsNames = array( 'assign', 'fetch', 'fetchTo', 'display', 'close', 'clearCache', 'run', 'post', 'get', 'map', 'error', 'redirect', 'callError', 'callErrorOn', 'load' );
+	private $_aDynamicMethods = array();
 
 } // class::Zewo
