@@ -292,6 +292,22 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		return json_encode( $oExport );
 	} // _jsonize
 
+	protected function _getCacheKey( $mParams = null ) {
+		if( is_null( $this->_sCacheKey ) ) {
+			if( is_null( $mParams ) ) {
+				if( $this->_oStructure->hasMultiplePrimary() ) {
+					$mParams = array();
+					foreach ( $this->_oStructure->primary as $oColumn)
+						$mParams[] = $this->_aColumnsData[ $oColumn->name ];
+				} else
+					$mParams = $this->_aColumnsData[ $this->_oStructure->primary->name ];
+			}
+			$sCacheKey = is_array( $mParams ) ? http_build_query( $mParams ) : strval( $mParams );
+			parent::_getCacheKey( $sCacheKey );
+		}
+		return $this->_sCacheKey;
+	} // _getCacheKey
+
 	protected $_bNew = true;
 
 	protected $_aColumnsData = array();
@@ -303,22 +319,6 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 	protected $_mOriginalQuery;
 
 	protected $_oStructure;
-
-	private function _getCacheKey( $mParams = null ) {
-		if( !is_null( $this->_sCacheKey ) ) {
-			if( is_null( $mParams ) ) {
-				if( $this->_oStructure->hasMultiplePrimary() ) {
-					$mParams = array();
-					foreach ( $this->_oStructure->primary as $oColumn)
-						$mParams[] = $this->_aColumnsData[ $oColumn->name ];
-				} else
-					$mParams = $this->_aColumnsData[ $this->_oStructure->primary->name ];
-			}
-			$sCacheKey = is_array( $mParams ) ? http_build_query( $mParams ) : strval( $mParams );
-			$this->_setCacheKey( $sCacheKey );
-		}
-		return $this->_sCacheKey;
-	} // _getCacheKey
 
 	private $_sLoadQuery;
 	private $_sSaveQuery;
