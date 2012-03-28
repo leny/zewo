@@ -66,6 +66,7 @@ class Templating extends \Zewo\Tools\Singleton {
 
 	private function _generateAssignedVars() {
 		$sCode  = '<?php ' . "\n";
+		$sCode .= '		$zewo = \Zewo\Zewo::getInstance();' . "\n";
 		foreach( $this->_aAssignedVariables as $sName => $mValue )
 			$sCode .= '		$' . $sName . ' = \Zewo\Templates\Templating::getInstance()->getAssignedVariable( \'' . $sName . '\' );' . "\n";
 		$sCode .= '?>' . "\n";
