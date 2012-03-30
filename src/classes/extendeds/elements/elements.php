@@ -1,6 +1,6 @@
 <?php
 /** flatLand! : zewo
- * /classes/extendeds/elements/element.php
+ * /classes/extendeds/elements/elements.php
  */
 
 namespace Zewo\Extendeds\Elements;

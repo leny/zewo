@@ -7,14 +7,14 @@ namespace Zewo\Extendeds\Elements;
 
 abstract class Element extends \Zewo\ORM\Elements\Element {
 
-	public function __construct( $sTable, $mQuery ) {
-		return parent::__construct( $sTable, $mQuery );
+	public function __construct( $sTable, $mQuery, $bFromCache = true ) {
+		return parent::__construct( $sTable, $mQuery, $bFromCache );
 	} // __construct
 
 	public static function restore( $sKey = null ) {
 		if( is_null( $sKey ) )
 			return false && trigger_error( "Tentative de récupération d'un object [" . get_called_class() . "] sans clé.", E_USER_WARNING );
-		return \Zewo\Zewo::getInstance()->globals->session( $sKey ) ? unserialize( base64_decode( \Zewo\Zewo::getInstance()->globals->session( $sKey ) ) ) : false && trigger_error( "L'object [" . get_called_class() . "] stocké sous le nom '".$sKey."' n'existe pas.", E_USER_NOTICE);
+		return \Zewo\Zewo::getInstance()->globals->session( $sKey ) ? unserialize( base64_decode( \Zewo\Zewo::getInstance()->globals->session( $sKey ) ) ) : false && trigger_error( "L'object [" . get_called_class() . "] stocké sous le nom '" . $sKey . "' n'existe pas.", E_USER_NOTICE);
 	} // restore
 
 	public function store( $sKey ) {

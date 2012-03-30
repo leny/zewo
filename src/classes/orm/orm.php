@@ -13,7 +13,7 @@ class ORM extends \Zewo\Tools\Singleton {
 	} // createClass
 
 	public function generateClass( $sClassName, $sTableName ) {
-		eval( 'namespace { class ' . $sClassName . ' extends ' . $this->_oZewo->config->get( 'orm.baseClass' ) . ' { public function __construct( $mID=null ) { return parent::__construct( "' . $sTableName . '", $mID ); } } }' );
+		eval( 'namespace { class ' . $sClassName . ' extends ' . $this->_oZewo->config->get( 'orm.baseClass' ) . ' { public function __construct( $mID=null, $bFromCache=true ) { return parent::__construct( "' . $sTableName . '", $mID, $bFromCache ); } } }' );
 		return $sClassName;
 	} // generateClass
 
