@@ -24,6 +24,9 @@ class Globals extends \Zewo\Tools\Singleton {
 			case 'files':
 				$aTable = $_FILES;
 				break;
+			case 'data':
+				$aTable = $this->_aData;
+				break;
 			default:
 				return false;
 				break;
