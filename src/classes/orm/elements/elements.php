@@ -56,9 +56,10 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 	public function __construct( $sTargetClass, $sQuery, $bFromCache = true ) {
 		$this->_sTargetClass = '\\' . $sTargetClass;
-		if( !$bFromCache )
+		$this->_bCached = $bFromCache;
+		if( !$this->_bCached )
 			$this->_load( $sQuery );
-		elseif( !$this->_getFromCache( $this->_getCacheKey( $sQuery ) ) )
+		else if( !$this->_getFromCache( $this->_getCacheKey( $sQuery ) ) )
 			$this->_load( $sQuery );
 		return $this;
 	} // __construct
@@ -131,7 +132,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 	// -- implements:Iterator
 	public function rewind() { $this->_iPosition = 0; }
-    public function current() { return $this->_getAt( $this->_iPosition, true ); }
+    public function current() { return $this->_getAt( $this->_iPosition ); }
     public function key() { return $this->_iPosition; }
     public function next() { ++$this->_iPosition; }
     public function valid() { return isset( $this->_aElements[ $this->_iPosition ] ); }
@@ -140,7 +141,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 	public function offsetSet( $iOffset, $mValue ) { $this->_aElements[ $iOffset ] = $mValue; }
     public function offsetExists( $iOffset ) { return isset( $this->_aElements[ $iOffset ] ); }
     public function offsetUnset( $iOffset ) { unset( $this->_aElements[ $iOffset ] ); }
-    public function offsetGet( $iOffset ) { return $this->_getAt( $iOffset, true ); }
+    public function offsetGet( $iOffset ) { return $this->_getAt( $iOffset ); }
 
     // -- implements:Countable
 	public function count() { return $this->size; }
@@ -148,22 +149,20 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 	protected function _load( $sQuery ) {
 		$this->_sLoadQuery = $sQuery;
 		$this->_aElements = \Zewo\Zewo::getInstance()->db->query( $this->_sLoadQuery );
-		$this->_storeInCache( $this->_getCacheKey( $this->_sLoadQuery ) );
+		if( $this->_bCached )
+	    	$this->_storeInCache( $this->_getCacheKey( $this->_sLoadQuery ) );
     	return $this;
 	} // _load
 
 	protected function _loadAll() {
 		for( $i=0; $i < $this->size; $i++ )
 			$this->_getAt( $i );
-		$this->_storeInCache( $this->_getCacheKey( $this->_sLoadQuery ) );
 		$this->_bAllLoaded = true;
 	} // _loadAll
 
-	protected function _getAt( $iIndex, $bThenStore=false ) {
+	protected function _getAt( $iIndex ) {
 		if( is_array( $this->_aElements[ $iIndex ] ) )
-			$this->_aElements[ $iIndex ] = new $this->_sTargetClass( $this->_aElements[ $iIndex ] );
-		if( $bThenStore )
-			$this->_storeInCache( $this->_getCacheKey( $this->_sLoadQuery ) );
+			$this->_aElements[ $iIndex ] = new $this->_sTargetClass( $this->_aElements[ $iIndex ], $this->_bCached );
 		return $this->_aElements[ $iIndex ];
 	} // _getAt
 
@@ -200,5 +199,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 	protected $_iPageSize = 10;
 	protected $_iCurrentPage = 1;
+
+	protected $_bCached = true;
 
 } // class::Elements
