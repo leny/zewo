@@ -282,6 +282,12 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		return $this->_aSubClassesData[ $oColumn->name ];
 	} // _getSubClass
 
+	protected function _setSubClass( $sName, $mValue ) {
+		$sForeignColumn = $this->_oStructure->getColumn( $sName )->foreignColumn->name;
+		$this->_aSubClassesData[ $sName ] = $mValue;
+		$this->_aColumnsData[ $sName ] = $mValue->$sForeignColumn;
+	} // _setSubClass
+
 	protected function _hasChanges() {
 		$aValues = $aVerify = array();
 		foreach( $this->_oStructure->columns as $oColumn ) {
