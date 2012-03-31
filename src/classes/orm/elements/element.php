@@ -237,7 +237,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
     } // _save
 
     protected function _delete() {
-		$this->_sDeleteQuery = "DELETE FROM `" . $this->_sTable . "` WHERE " . $this->_getWhereClause();
+		$this->_sDeleteQuery = "DELETE FROM `" . $this->_oStructure->table . "` WHERE " . $this->_getWhereClause();
 		$bOperation = \Zewo\Zewo::getInstance()->db->query( $this->_sDeleteQuery );
 		if( $bOperation ) {
 			$this->_removeFromCache( $this->_getCacheKey() );
