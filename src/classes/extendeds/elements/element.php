@@ -28,6 +28,10 @@ abstract class Element extends \Zewo\ORM\Elements\Element {
 		return $this;
 	} // assign
 
+	public function trace() {
+		\Zewo\Zewo::getInstance()->utils->trace( $this );
+	} // trace
+
 	public static function get( $sQuery, $bFromCache = true ) {
 		return new \Zewo\Extendeds\Elements\Elements( get_called_class(), $sQuery, $bFromCache );
 	} // get
