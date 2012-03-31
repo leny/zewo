@@ -7,7 +7,7 @@ namespace Zewo\Extendeds\Elements;
 
 abstract class Element extends \Zewo\ORM\Elements\Element {
 
-	public function __construct( $sTable, $mQuery, $bFromCache = true ) {
+	public function __construct( $sTable, $mQuery = null, $bFromCache = true ) {
 		return parent::__construct( $sTable, $mQuery, $bFromCache );
 	} // __construct
 

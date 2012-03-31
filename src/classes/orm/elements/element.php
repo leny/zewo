@@ -48,7 +48,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 			$this->_aDynamicData[ $sName ] = $mValue;
 	} // __set
 
-	public function __construct( $sTable, $mQuery, $bFromCache = true ) {
+	public function __construct( $sTable, $mQuery = null, $bFromCache = true ) {
 		$this->_oStructure = new \Zewo\ORM\Structure\Table( \Zewo\Zewo::getInstance()->db->currentDatabase, $sTable );
 		if( is_null( $mQuery ) )
 			return $this->_reset();
