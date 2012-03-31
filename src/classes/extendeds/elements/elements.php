@@ -16,4 +16,8 @@ class Elements extends \Zewo\ORM\Elements\Elements {
 		return $this;
 	} // assign
 
+	public function trace() {
+		\Zewo\Zewo::getInstance()->utils->trace( $this );
+	} // trace
+
 } // class::Elements
