@@ -134,7 +134,8 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 				$aPrimary[] = $oColumn->name;
 		else
 			$aPrimary[] = $oTable->primary->name;
-		return self::get( "SELECT " . implode( ',', $aPrimary ) . " FROM " . $oTable->name, $bFromCache );
+		$sClassName = get_called_class();
+		return $sClassName::get( "SELECT " . implode( ',', $aPrimary ) . " FROM " . $oTable->name, $bFromCache );
 	} // getAll
 
 	// - implements:ArrayAccess
