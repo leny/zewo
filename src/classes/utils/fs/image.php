@@ -87,7 +87,7 @@ class Image extends File {
 		gc_collect_cycles();
 	} // _updateInfos
 
-	protected function _save($sUrl=null, $iImageQuality=100) {
+	protected function _save( $sUrl=null, $iImageQuality=100 ) {
 		if( is_null( $sUrl ) )
 			ob_start();
 		switch($this->_sExtension) {
@@ -122,8 +122,8 @@ class Image extends File {
 
 	// --- private methods
 
-	private function _resize($iNewWidth, $iNewHeight, $sResizeType) {
-		$aOptionArray = $this->_getDimensions($iNewWidth, $iNewHeight, $sResizeType);
+	private function _resize( $iNewWidth, $iNewHeight, $sResizeType ) {
+		$aOptionArray = $this->_getDimensions( $iNewWidth, $iNewHeight, $sResizeType );
 
 		$iOptimalWidth = $aOptionArray['optimalWidth'];
 		$iOptimalHeight = $aOptionArray['optimalHeight'];
