@@ -119,5 +119,14 @@ class Utils extends \Zewo\Tools\Singleton {
 		return $iComputedSize;
 	} // folder_size
 
+	function array_keys_exists( $aNeedle, $aHaystack ) {
+		if( !is_array( $aHaystack ) )
+			return false;
+		foreach( $aNeedle as $sKey )
+			if( !array_key_exists( $sKey, $aHaystack ) )
+				return false;
+		return true;
+	} // array_has_keys
+
 
 } // class::Utils
