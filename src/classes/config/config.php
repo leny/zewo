@@ -17,6 +17,7 @@ class Config extends \Zewo\Tools\Singleton {
 	} // get
 
 	public function apply( $aConfig, $sPathBase = null ) {
+		$this->_aDefault[ 'path' ][ 'url' ] = 'http://' . $_SERVER[ 'HTTP_HOST' ] . '/';
 		foreach( $this->_aDefault as $sSection => $aParameters )
 			$this->_aData[ $sSection ] = isset( $aConfig[ $sSection ] ) ? array_merge( $this->_aDefault[ $sSection ], $aConfig[ $sSection ] ) : $this->_aDefault[ $sSection ];
 		if( !is_null( $sPathBase ) ) {
@@ -43,6 +44,11 @@ class Config extends \Zewo\Tools\Singleton {
 		'orm' => array(
 			'cacheKey' => 'noCacheKey',
 			'baseClass' => '\Zewo\Extendeds\Elements\Element',
+		),
+		// PATH
+		'path' => array(
+			'url' => null,
+			'files' => 'files/'
 		),
 		// TEMPLATES
 		'template' => array(

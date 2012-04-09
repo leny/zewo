@@ -34,15 +34,13 @@ class File extends FileSystem {
 				return $this->_sPath;
 				break;
 
-			/*
 			case 'url':
-				return Config::get( 'path.url' ) . '/' . Config::get( 'folders.files' ) . $this->filename;
+				return \Zewo\Config\Config::getInstance()->get( 'path.url' ) . '/' . \Zewo\Config\Config::getInstance()->get( 'path.files' ) . $this->filename;
 				break;
 
 			case 'tag':
 				return '<img alt="" src="' . $this->url . '" />';
 				break;
-			*/
 
 			case 'content':
 				return $this->read();
@@ -86,7 +84,7 @@ class File extends FileSystem {
 		if( $this->_bUploaded ) {
 			if( is_dir( $sPath ) )
 				$sPath = $sPath . $this->_sBaseName . '.' . $this->_sExtension;
-			$bOperation = move_uploaded_file($this->_sPath, $sPath);
+			$bOperation = move_uploaded_file( $this->_sPath, $sPath );
 			if( $bOperation ) {
 				$this->_bUploaded = false;
 				$this->_sPath = $sPath;
@@ -102,7 +100,7 @@ class File extends FileSystem {
 
 	public function copyTo( $sPath=null, $sPrefix=null ) {
 		if( is_null( $sPath ) && is_null( $sPrefix ) )
-			return false && trigger_error( "File::copyTo required at least a path or a prefix !" );
+			throw new \InvalidArgumentException( "File::copyTo required at least a path or a prefix !" );
 		if( is_null( $sPrefix ) ) {
 			$bOperation = copy( $this->_sPath, $sPath );
 			if( $bOperation ) {
@@ -151,7 +149,7 @@ class File extends FileSystem {
 	} // write
 
 	public function isImage() {
-		return get_called_class() === 'CMSImage';
+		return get_called_class() === 'Image';
 	} // isImage
 
 	// --- protected methods
@@ -211,7 +209,7 @@ class File extends FileSystem {
 
 	protected $_bUploaded = false;
 
-	protected static $_aGlobalFileArrayPattern = array('name', 'type', 'tmp_name', 'error', 'size');
+	protected static $_aGlobalFileArrayPattern = array( 'name', 'type', 'tmp_name', 'error', 'size' );
 
 	// --- private methods
 
