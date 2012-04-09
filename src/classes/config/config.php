@@ -17,7 +17,8 @@ class Config extends \Zewo\Tools\Singleton {
 	} // get
 
 	public function apply( $aConfig, $sPathBase = null ) {
-		$this->_aData = array_merge( $this->_aDefault, $aConfig );
+		foreach( $this->_aDefault as $sSection => $aParameters )
+			$this->_aData[ $sSection ] = isset( $aConfig[ $sSection ] ) ? array_merge( $this->_aDefault[ $sSection ], $aConfig[ $sSection ] ) : $this->_aDefault[ $sSection ];
 		if( !is_null( $sPathBase ) ) {
 			$this->_aData[ 'template' ][ 'folders' ][ 'cache' ] = $sPathBase . $this->_aData[ 'template' ][ 'folders' ][ 'cache' ];
 			$this->_aData[ 'template' ][ 'folders' ][ 'templates' ] = $sPathBase . $this->_aData[ 'template' ][ 'folders' ][ 'templates' ];
