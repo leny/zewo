@@ -14,6 +14,10 @@ include( __DIR__ . '/classes/utils/utils.php' );
 include( __DIR__ . '/classes/utils/convertor.php' );
 include( __DIR__ . '/classes/utils/globals.php' );
 
+include( __DIR__ . '/classes/utils/fs/filesystem.php' );
+include( __DIR__ . '/classes/utils/fs/file.php' );
+include( __DIR__ . '/classes/utils/fs/image.php' );
+
 include( __DIR__ . '/classes/config/config.php' );
 
 include( __DIR__ . '/classes/db/db.php' );
