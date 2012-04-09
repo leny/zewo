@@ -63,7 +63,7 @@ class File extends FileSystem {
 	// --- constructor
 
 	public function __construct( $mData ) {
-		if( array_has_keys( self::$_aGlobalFileArrayPattern, $mData ) ) {
+		if( \Zewo\Zewo::getInstance()->utils->array_keys_exists( self::$_aGlobalFileArrayPattern, $mData ) ) {
 			return !is_uploaded_file( $mData['tmp_name'] ) ? false : $this->_loadFromGlobals( $mData );
 		} else {
 			return $this->_loadFromPath( $mData );
