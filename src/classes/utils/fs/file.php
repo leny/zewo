@@ -35,7 +35,7 @@ class File extends FileSystem {
 				break;
 
 			case 'url':
-				return \Zewo\Config\Config::getInstance()->get( 'path.url' ) . '/' . \Zewo\Config\Config::getInstance()->get( 'path.files' ) . $this->filename;
+				return \Zewo\Config\Config::getInstance()->get( 'path.url' ) . \Zewo\Config\Config::getInstance()->get( 'path.files' ) . $this->filename;
 				break;
 
 			case 'tag':
