@@ -182,16 +182,16 @@ class File extends FileSystem {
 
 	protected function _HUSize() {
 		$iSizeInKo = $this->_iSize / 1024;
-		if( round($iSizeInKo, 1) > 1024*1024 ) {
+		if( round( $iSizeInKo, 1 ) > 1024 * 1024 ) {
    			$iSizeInGo = $iSizeInKo / 1024 / 1024;
-   			return round($iSizeInGo, 2)."Go";
-		} elseif( round($iSizeInKo, 1) > 1024 ) {
+   			return round( $iSizeInGo, 2 )."Go";
+		} elseif( round( $iSizeInKo, 1 ) > 1024 ) {
 			$iSizeInMo = $iSizeInKo / 1024;
-			return round($iSizeInMo, 1)."Mo";
-		} elseif( $iSizeInOctet > 1024 ) {
-			return round($iSizeInKo)."ko";
+			return round( $iSizeInMo, 1 )."Mo";
+		} elseif( $this->_iSize > 1024 ) {
+			return round( $iSizeInKo )."ko";
 		} else
-			return round($iSizeInOctet)."o";
+			return round( $this->_iSize )."o";
 	} // HUSize
 
 	// --- protected properties
