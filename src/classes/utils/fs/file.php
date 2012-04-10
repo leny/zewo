@@ -149,7 +149,7 @@ class File extends FileSystem {
 	} // write
 
 	public function isImage() {
-		return get_called_class() === 'Image';
+		return get_called_class() === 'Zewo\Utils\FS\Image';
 	} // isImage
 
 	// --- protected methods
