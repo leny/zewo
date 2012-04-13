@@ -152,8 +152,8 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
     		foreach( $mQuery as $sKey => $mValue ) {
     			$oColumn = $this->_oStructure->getColumn( $sKey );
     			if( $oColumn->isForeign() ) {
-    				if( !is_subclass_of( $mValue, 'Element' ) )
-    					throw new \UnexpectedValueException( $sKey . " must be a subclass of Element !" );
+    				if( !is_subclass_of( $mValue, '\Zewo\ORM\Elements\Element' ) )
+    					throw new \UnexpectedValueException( $sKey . " must be a subclass of \Zewo\ORM\Elements\Element !" );
     				$sForeignProperty = $oColumn->foreignColumn->name;
     				$aSearchClause[] = '`' . $this->_oStructure->table . '`.`' . $sKey."` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $mValue->$sForeignProperty, $oColumn ) . "";
     			} else
@@ -273,7 +273,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 
 	protected function _getSubClass( \Zewo\ORM\Structure\Column $oColumn ) {
 		if( !$oColumn->isForeign() )
-			throw new \LogicException( 'This should never append : calling internal _getSubClass method for a property not foreigned. Post issue on github, please. Thanks.' );
+			throw new \LogicException( 'This should never append : calling internal _getSubClass method for a property not foreigned. Thanks.' );
 		if( $oColumn->isNullable() && is_null( $this->_aColumnsData[ $oColumn->name ] ) )
 			return null;
 		if( !isset( $this->_aSubClassesData[ $oColumn->name ] ) ) {
@@ -301,7 +301,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 	protected function _jsonize() {
 		$oExport = new stdClass();
 		foreach( array_keys( $this->_aColumnsData ) as $sProperty )
-			$oExport->$sProperty = ( gettype( $this->$sProperty ) == 'object' && is_a( $this->$sProperty, 'Element' ) ) ? json_decode( $this->$sProperty->toJSON() ) : $this->$sProperty;
+			$oExport->$sProperty = ( gettype( $this->$sProperty ) == 'object' && is_a( $this->$sProperty, '\Zewo\ORM\Elements\Element' ) ) ? json_decode( $this->$sProperty->toJSON() ) : $this->$sProperty;
 		return json_encode( $oExport );
 	} // _jsonize
 
