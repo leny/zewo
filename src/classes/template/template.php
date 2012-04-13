@@ -197,7 +197,7 @@ class Template {
 			if( !in_array( substr( $sVarName, 1 ) , $this->_aEncounteredVars ) )
 				$this->_aEncounteredVars[] = substr( $sVarName, 1 );
 		} else {
-			if( !in_array( $sVarName , $this->_aEncounteredConstants ) )
+			if( ( $sVarName == strtoupper( $sVarName ) ) && !in_array( $sVarName , $this->_aEncounteredConstants ) )
 				$this->_aEncounteredConstants[] = $sVarName;
 		}
 	} // _registerVar
