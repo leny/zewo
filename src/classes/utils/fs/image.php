@@ -61,7 +61,7 @@ class Image extends File {
 	// --- protected methods
 
 	protected function _load() {
-		switch($this->_sExtension) {
+		switch( $this->_sExtension ) {
 			case 'jpg':
 			case 'jpeg':
 				$this->_rLoadedImg = @imagecreatefromjpeg($this->_sPath);
@@ -73,7 +73,7 @@ class Image extends File {
 				$this->_rLoadedImg = @imagecreatefromgif($this->_sPath);
 				break;
 			default:
-				return false && trigger_error("Le fichier n'est pas un format d'image valide.", E_USER_WARNING);
+				throw new \LogicException( "Le fichier n'est pas un format d'image valide." );
 				break;
 		}
 	} // _load
@@ -82,8 +82,8 @@ class Image extends File {
 		parent::_updateInfos();
 		if( is_null( $this->_rLoadedImg ) )
 			$this->_load();
-		$this->_iWidth = imagesx($this->_rResizedImg ?: $this->_rLoadedImg);
-		$this->_iHeight = imagesy($this->_rResizedImg ?: $this->_rLoadedImg);
+		$this->_iWidth = imagesx( $this->_rResizedImg ?: $this->_rLoadedImg );
+		$this->_iHeight = imagesy( $this->_rResizedImg ?: $this->_rLoadedImg );
 		gc_collect_cycles();
 	} // _updateInfos
 
