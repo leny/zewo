@@ -135,9 +135,12 @@ class Template {
 	} // _parseExpressionBlock
 
 	private function _parseExpression( $sExpression ) {
+		$sExpression = str_replace( array( '||', '&&' ) , array( ' or ', ' and ' ), $sExpression, $iCount );
 		$sExpressionAfter = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1, $iCount );
 		if( $sExpression == $sExpressionAfter && $iCount == 0 )
 			$sExpressionAfter = $this->_parseExpressionPart( $sExpressionAfter );
+		if( $iCount > 0 )
+			$sExpressionAfter = str_replace( array( ' or ', ' and ' ), array( ' || ', ' && ' ), $sExpressionAfter );
 		return $sExpressionAfter;
 	} // _parseExpression
 
@@ -191,13 +194,17 @@ class Template {
 		if( ( $sVarName{0} == "'" && substr( $sVarName, -1 ) == "'" ) || ( $sVarName{0} == '"' && substr( $sVarName, -1 ) == '"' ) )
 			return;
 		if( $sVarName{ 0 } == '$' ) {
+			if( stripos( $sVarName, ' or ' ) !== false || stripos( $sVarName, ' and ' ) !== false )
+				return;
+			if( !is_null( preg_filter( $this->_aExpressionSplitRegexes, 'BUSTED', $sVarName ) ) )
+				return;
 			if( !in_array( $sVarName , $this->_aEncounteredVars ) )
 				$this->_aEncounteredVars[] = $sVarName;
 		} elseif( $sVarName{ 0 } == '!' && $sVarName{ 1 } == '$' ) {
 			if( !in_array( substr( $sVarName, 1 ) , $this->_aEncounteredVars ) )
 				$this->_aEncounteredVars[] = substr( $sVarName, 1 );
 		} else {
-			if( ( $sVarName == strtoupper( $sVarName ) ) && !in_array( $sVarName , $this->_aEncounteredConstants ) )
+			if( ( $sVarName == strtoupper( $sVarName ) ) && !in_array( $sVarName , $this->_aEncounteredConstants ) && !is_numeric( $sVarName ) )
 				$this->_aEncounteredConstants[] = $sVarName;
 		}
 	} // _registerVar
@@ -217,7 +224,6 @@ class Template {
 	} // _replaceForeachs
 
 	private function _parseForeachBlock( $aMatches ) {
-		// $this->_oZewo->utils->trace( $aMatches );
 		$sCode = '';
 		// parse parameters
 		$aParameters = array(
@@ -280,6 +286,7 @@ class Template {
 		// expression
 	private $_sExpressionBlockRegex = '/\{([^\}]+)\}/';
 	private $_aExpressionSplitRegexes = array(
+		'/(.+)\s(and|or)(.+)/',
 		'/(.+)\s(<>|!=+|==+)(.+)/',
 		'/(.+)([^-][<>]=?)(.+)/',
 		'/(.+)(\+|-[^\>]|\*|\/|%)(.+)/',
