@@ -13,6 +13,7 @@ include( __DIR__ . '/tools/cached.php' );
 include( __DIR__ . '/classes/utils/utils.php' );
 include( __DIR__ . '/classes/utils/convertor.php' );
 include( __DIR__ . '/classes/utils/globals.php' );
+include( __DIR__ . '/classes/utils/void.php' );
 
 include( __DIR__ . '/classes/utils/fs/filesystem.php' );
 include( __DIR__ . '/classes/utils/fs/file.php' );
