@@ -70,7 +70,7 @@ class Templating extends \Zewo\Tools\Singleton {
 		$sCode .= '		define( "LDELIM", "{" );' . "\n";
 		$sCode .= '		define( "RDELIM", "}" );' . "\n";
 		foreach( $this->_aAssignedVariables as $sName => $mValue )
-			$sCode .= '		$' . $sName . ' = \Zewo\Templates\Templating::getInstance()->getAssignedVariable( \'' . $sName . '\' );' . "\n";
+			$sCode .= '		$' . $sName . ' = $zewo->tpl->getAssignedVariable( \'' . $sName . '\' );' . "\n";
 		$sCode .= '?>' . "\n";
 		return $sCode;
 	} // _generateAssignedVars
