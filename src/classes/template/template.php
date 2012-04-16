@@ -73,8 +73,12 @@ class Template {
 
 	private function _generatingVarsDeclarations() {
 		$sCode  = '<?php ' . "\n";
-		foreach( $this->_aEncounteredVars as $sVarName )
-			$sCode .= "\t" . '' . $sVarName . ' = isset( ' . $sVarName . ' ) ? ' . $sVarName . ' : null;' . "\n";
+		foreach( $this->_aEncounteredVars as $sVarName ) {
+			if( isset( $this->_aEncounteredObject[ $sVarName ] ) )
+				$sCode .= "\t" . '' . $sVarName . ' = isset( ' . $sVarName . ' ) ? ' . $sVarName . ' : new \Zewo\Utils\Void();' . "\n";
+			else
+				$sCode .= "\t" . '' . $sVarName . ' = isset( ' . $sVarName . ' ) ? ' . $sVarName . ' : null;' . "\n";
+		}
 		foreach( $this->_aEncounteredConstants as $sConstantName )
 			$sCode .= "\t" . 'defined( "' . $sConstantName . '" ) ?: define( "' . $sConstantName . '", null );' . "\n";
 		$sCode .= '?>' . "\n";
@@ -173,9 +177,10 @@ class Template {
 		for( $i = -1, $l = sizeof( $aVarComponents ); ++$i < $l; ) {
 			if( $aVarComponents[ $i ] == '.' )
 				$sVarName .= "[ '" . $aVarComponents[ ++$i ] . "' ]";
-			elseif( $aVarComponents[ $i ] == '->' )
+			elseif( $aVarComponents[ $i ] == '->' ) {
+				$this->_aEncounteredObject[ $aVarComponents[ 0 ] ] = true;
 				$sVarName .= "->" . $aVarComponents[ ++$i ];
-			else
+			} else
 				$sVarName .= $aVarComponents[ $i ];
 		}
 		return $sVarName;
@@ -275,6 +280,7 @@ class Template {
 	private $_oZewo;
 
 	private $_aEncounteredVars = array();
+	private $_aEncounteredObject = array();
 	private $_aEncounteredConstants = array();
 
 	private static $_aCompiledTemplates = array();
