@@ -67,8 +67,8 @@ class Templating extends \Zewo\Tools\Singleton {
 	private function _generateAssignedVars() {
 		$sCode  = '<?php ' . "\n";
 		$sCode .= '		$zewo = \Zewo\Zewo::getInstance();' . "\n";
-		$sCode .= '		define( "LDELIM", "{" );' . "\n";
-		$sCode .= '		define( "RDELIM", "}" );' . "\n";
+		$sCode .= '		defined( "LDELIM" ) ?: define( "LDELIM", "{" );' . "\n";
+		$sCode .= '		defined( "RDELIM" ) ?: define( "RDELIM", "}" );' . "\n";
 		foreach( $this->_aAssignedVariables as $sName => $mValue )
 			$sCode .= '		$' . $sName . ' = $zewo->tpl->getAssignedVariable( \'' . $sName . '\' );' . "\n";
 		$sCode .= '?>' . "\n";
