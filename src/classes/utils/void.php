@@ -8,7 +8,7 @@ namespace Zewo\Utils;
 class Void {
 
 	public function __get( $sName ) {
-		return null;
+		return new Void();
 	} // __get
 
 	public function __set( $sName, $mValue ) {
@@ -24,7 +24,7 @@ class Void {
 	} // __unset
 
 	public function __call( $sName, $aArguments ) {
-		return null;
+		return new Void();
 	} // __call
 
 	public function __toString() {
@@ -32,7 +32,7 @@ class Void {
 	} // __toString
 
 	public function __invoke() {
-		return null;
+		return new Void();
 	} // __invoke
 
 	public function __construct() {
@@ -40,7 +40,7 @@ class Void {
 	} // __construct
 
 	public static function __callStatic( $sName, $aArguments ) {
-		return null;
+		return new Void();
 	} // __callStatic
 
 } // class::Void
