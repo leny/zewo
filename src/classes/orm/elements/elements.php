@@ -19,7 +19,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 			case 'length':
 			case 'size':
-				return sizeof( $this->_aElements );
+				return empty( $this->_aElements ) ? 0 : sizeof( $this->_aElements );
 				break;
 
 			case 'page':
