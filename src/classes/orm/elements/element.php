@@ -299,7 +299,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 	} // _hasChanges
 
 	protected function _jsonize() {
-		$oExport = new stdClass();
+		$oExport = new \stdClass();
 		foreach( array_keys( $this->_aColumnsData ) as $sProperty )
 			$oExport->$sProperty = ( gettype( $this->$sProperty ) == 'object' && is_a( $this->$sProperty, '\Zewo\ORM\Elements\Element' ) ) ? json_decode( $this->$sProperty->toJSON() ) : $this->$sProperty;
 		return json_encode( $oExport );
