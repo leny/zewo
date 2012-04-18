@@ -162,7 +162,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 	protected function _getAt( $iIndex ) {
 		if( is_array( $this->_aElements[ $iIndex ] ) )
-			$this->_aElements[ $iIndex ] = new $this->_sTargetClass( $this->_aElements[ $iIndex ], $this->_bCached );
+			$this->_aElements[ $iIndex ] = new $this->_sTargetClass( $this->_convertSearchClauses( $iIndex ), $this->_bCached );
 		return $this->_aElements[ $iIndex ];
 	} // _getAt
 
@@ -182,6 +182,15 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 			parent::_getCacheKey( md5( $sQuery ) );
 		return $this->_sCacheKey;
 	} // _getCacheKey
+
+	protected function _convertSearchClauses( $iIndex ) {
+		$aConvertedSearchClauses = array();
+		$oConvertor = \Zewo\Utils\Convertor::getInstance();
+		$oTable = new \Zewo\ORM\Structure\Table( \Zewo\Zewo::getInstance()->db->currentDatabase, $oConvertor->fromClassNameToTableName( $this->_sTargetClass ) );
+		foreach( $this->_aElements[ $iIndex ] as $sColumn=>$mValue )
+			$aConvertedSearchClauses[ $sColumn ] = $oConvertor->fromDB( $mValue, $oTable->getColumn( $sColumn ), true );
+		return $aConvertedSearchClauses;
+	} // _convertSearchClauses
 
 	protected $_iPosition = 0;
 
