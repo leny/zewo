@@ -260,10 +260,10 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 			foreach( $this->_oStructure->primary as $oColumn ) {
 				$sProperty = $oColumn->name;
 				if( $oColumn->isForeign() ) {
-					$sForeignColumn = $oColumn->foreignColumn;
-					$aWhereClause[] = '`' . $this->_oStructure->table . '`.`' . $sColumn."` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->$sProperty->$sForeignColumn, $oColumn ) . "";
+					$sForeignColumn = $oColumn->foreignColumn->name;
+					$aWhereClause[] = '`' . $this->_oStructure->table . '`.`' . $sProperty . "` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->$sProperty->$sForeignColumn, $oColumn ) . "";
 				} else {
-					$aWhereClause[] = '`' . $this->_oStructure->table . '`.`' . $sColumn."` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->$sProperty, $oColumn ) . "";
+					$aWhereClause[] = '`' . $this->_oStructure->table . '`.`' . $sProperty . "` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->$sProperty, $oColumn ) . "";
 				}
 			}
 			return implode( ' AND ', $aWhereClause ) . " ";

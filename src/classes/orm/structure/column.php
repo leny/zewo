@@ -55,7 +55,7 @@ final class Column {
 				$this->_iSize = $aTypeInfos[2];
 		}
 		$this->_sDefault = $aSchemaInfos['COLUMN_DEFAULT'];
-		$this->_bPrimary = $aSchemaInfos['CONSTRAINT_NAME'] === 'PRIMARY';
+		$this->_bPrimary = $aSchemaInfos['PRIMARY'] === 'PRIMARY';
 		$this->_bNullable = $aSchemaInfos['IS_NULLABLE'] === 'YES';
 		if( $aSchemaInfos['REFERENCED_TABLE_NAME'] && $aSchemaInfos['REFERENCED_COLUMN_NAME'] ) {
 			$this->_oForeignTable = $aSchemaInfos['REFERENCED_TABLE_NAME'] == $this->_sTable ? $oTable : new \Zewo\ORM\Structure\Table( $oTable->base, $aSchemaInfos['REFERENCED_TABLE_NAME'] );
