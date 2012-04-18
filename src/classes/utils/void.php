@@ -24,7 +24,7 @@ class Void {
 	} // __unset
 
 	public function __call( $sName, $aArguments ) {
-		return new Void();
+		return null;
 	} // __call
 
 	public function __toString() {
