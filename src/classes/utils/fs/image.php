@@ -26,6 +26,10 @@ class Image extends File {
 				return $this->_iHeight;
 				break;
 
+			case 'tag':
+				return '<img alt="" src="' . $this->url . '" />';
+				break;
+
 			default:
 				return parent::__get( $sName );
 				break;
