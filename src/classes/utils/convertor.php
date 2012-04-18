@@ -7,9 +7,13 @@ namespace Zewo\Utils;
 
 class Convertor extends \Zewo\Tools\Singleton {
 
-	public function fromDB( $mValue, \Zewo\ORM\Structure\Column $oColumn ) {
+	public function fromDB( $mValue, \Zewo\ORM\Structure\Column $oColumn, $bReturnClass = false ) {
 		if( ( is_null( $mValue ) || empty( $mValue ) ) && $oColumn->isNullable() )
 			return null;
+		if( $bReturnClass && $oColumn->isForeign() ) {
+			$sClassName = $this->fromTableNameToClassName( $oColumn->foreignTable->table );
+			return new $sClassName( array( $oColumn->foreignColumn->name => $mValue ) );
+		}
 		switch( $oColumn->type ) {
 			case 'date':
 			case 'datetime':
