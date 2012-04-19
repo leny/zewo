@@ -121,6 +121,12 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		return $this->_bNew && empty( $this->_aColumnsData );
 	} // isNull
 
+	public function isTheSameAs( $oToCompare ) {
+		if( !is_a( $oToCompare, get_called_class() ) )
+			throw new \InvalidArgumentException( "Search must be a subclass of '" . get_called_class() . "'' !" );
+		return $this->_isTheSameAs( $oToCompare );
+	} // isTheSameAs
+
 	public static function get( $sQuery, $bFromCache = true ) {
 		return new \Zewo\ORM\Elements\Elements( get_called_class(), $sQuery, $bFromCache );
 	} // get
@@ -297,6 +303,19 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		}
 		return $aValues !== $aVerify;
 	} // _hasChanges
+
+	protected function _isTheSameAs( $oToCompare ) {
+		if( $this->_oStructure->hasMultiplePrimary() ) {
+			$bCompare = true;
+			foreach( $this->_oStructure->primary as $oPrimaryColumn ) {
+				$sProperty = $oPrimaryColumn->name;
+				$bCompare = $bCompare && ( $this->$sProperty === $oToCompare->$sProperty );
+			}
+		} else {
+			$sProperty = $this->_oStructure->primary->name;
+			return $this->$sProperty === $oToCompare->$sProperty;
+		}
+	} // _isTheSameAs
 
 	protected function _jsonize() {
 		$oExport = new \stdClass();
