@@ -68,6 +68,12 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 		return $this->_jsonize();
 	} // __toString
 
+	public function has( $oMember ) {
+		if( !is_a( $oMember, $this->_sTargetClass ) )
+			throw new \InvalidArgumentException( "Search must be a subclass of '" . $this->_sTargetClass . "'' !" );
+		return $this->_has( $oMember );
+	} // has
+
 	public function isEmpty() {
 		return ( $this->size === 0 );
 	} // isEmpty
@@ -191,6 +197,13 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 			$aConvertedSearchClauses[ $sColumn ] = $oConvertor->fromDB( $mValue, $oTable->getColumn( $sColumn ), true );
 		return $aConvertedSearchClauses;
 	} // _convertSearchClauses
+
+	protected function _has( $oMember ) {
+		for( $i=0; $i < $this->size; $i++ )
+			if( $this->_getAt( $i )->isTheSameAs( $oMember ) )
+				return true;
+		return false;
+	} // _has
 
 	protected $_iPosition = 0;
 
