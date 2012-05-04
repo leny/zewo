@@ -89,6 +89,10 @@ class Zewo extends Tools\Singleton {
 		$this->_applyConfig( $aConfig, $sPathBase );
 	} // init
 
+	public function reloadCache() {
+		$this->_oCache = Tools\Cache\Cache::getInstanceOf( $this->config->get( 'cache.type' ) );
+	} // reloadCache
+
 	public function registerMethod( $sMethod, $cCallback ) {
 		if( in_array( $sMethod, $this->_aReservedMethodsNames ) )
 			throw new \InvalidArgumentException( 'Method "' . $sMethod . '" already exists in zewo !' );
@@ -96,7 +100,7 @@ class Zewo extends Tools\Singleton {
 			throw new \InvalidArgumentException( 'Given callback method for "' . $sMethod . '" is not callable !' );
 		$this->_aDynamicMethods[ $sMethod ] = $cCallback;
 	} // registerMethod
-	
+
 	public function registerProperty( $sProperty, $cCallback ) {
 		if( in_array( $sProperty, $this->_aReservedPropertiesNames ) )
 			throw new \InvalidArgumentException( 'Property "' . $sProperty . '" already exists in zewo !' );
@@ -104,7 +108,7 @@ class Zewo extends Tools\Singleton {
 			throw new \InvalidArgumentException( 'Given callback property for "' . $sPropery . '" is not callable !' );
 		$this->_aDynamicProperties[ $sProperty ] = $cCallback;
 	} // registerProperty
-	
+
 	private function _applyConfig( $aConfig, $sPathBase ) {
 		$this->_oConfig = Config\Config::getInstance();
 		$this->_oConfig->apply( $aConfig, $sPathBase );
