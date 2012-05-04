@@ -8,6 +8,7 @@ namespace Zewo;
 include( __DIR__ . '/tools/singleton.php' );
 include( __DIR__ . '/tools/cache/cache.php' );
 include( __DIR__ . '/tools/cache/apc.php' );
+include( __DIR__ . '/tools/cache/session.php' );
 include( __DIR__ . '/tools/cached.php' );
 
 include( __DIR__ . '/classes/utils/utils.php' );
