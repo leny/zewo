@@ -37,6 +37,15 @@ class Utils extends \Zewo\Tools\Singleton {
 		echo '</div>';
 	} // trace
 
+	// log: usefull for cli
+	public function log( $mToLog, $bDump = false ) {
+		if( $bDump )
+			var_dump( $mToLog );
+		else
+			echo $mToLog;
+		echo "\n";
+	} // log
+
 	public function load( $mPaths ) {
 		$aFiles = ( is_array( $mPaths ) && sizeof( $mPaths ) ) ? $mPaths : glob( $mPaths );
 		foreach( $aFiles as $sFilePath )
