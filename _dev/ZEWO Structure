@@ -1,10 +1,10 @@
 ZEWO Structure
 
-$zewo->init( path|array )
+DONE : $zewo->init( path|array )
 
-$zewo->load( path|pattern|array )
+DONE : $zewo->load( path|pattern|array )
 
-$zewo->run()
+DONE : $zewo->run()
 
 ROUTING methods
 
