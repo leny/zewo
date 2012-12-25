@@ -51,7 +51,7 @@ class db extends \Zewo\Tools\Singleton {
 	} // __set
 
 	public function addConnexion( $sName, $sHost, $sLogin, $sPass, $bSelect=false ) {
-		$rConnexion = mysqli_connect($sHost, $sLogin, $sPass);
+		$rConnexion = mysqli_connect( $sHost, $sLogin, $sPass );
 		if( !$rConnexion )
 			throw new \InvalidArgumentException( 'MySQL Connexion Error (' . mysqli_connect_errno() . ' : ' . mysqli_connect_error() . ')' );
 		if( isset( $this->_aConnexions[ $sName ] ) )
