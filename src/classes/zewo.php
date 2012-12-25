@@ -116,8 +116,17 @@ class Zewo extends Tools\Singleton {
 		$this->_oUtils = Utils\Utils::getInstance();
 		// db
 		$this->_oDB = DB\db::getInstance();
-		$this->_oDB->addConnexion( $this->config->get( 'db.connexion' ), $this->config->get( 'db.host' ), $this->config->get( 'db.login' ), $this->config->get( 'db.pass' ), true );
-		$this->_oDB->addDatabase( $this->config->get( 'db.connexion' ), $this->config->get( 'db.base' ), true );
+		if( $this->_oUtils->array_keys_exists( array( 'connexion', 'host', 'base', 'login', 'pass' ), $this->config->get( 'db' ) ) ) {
+			$this->_oDB->addConnexion( $this->config->get( 'db.connexion' ), $this->config->get( 'db.host' ), $this->config->get( 'db.login' ), $this->config->get( 'db.pass' ), true );
+			$this->_oDB->addDatabase( $this->config->get( 'db.connexion' ), $this->config->get( 'db.base' ), true );
+		} elseif( is_array( $this->config->get( 'db' ) ) ) {
+			foreach( $this->config->get( 'db' ) as $aConnexionInfos ) {
+				if( $this->_oUtils->array_keys_exists( array( 'connexion', 'host', 'base', 'login', 'pass' ), $aConnexionInfos ) ) {
+					$this->_oDB->addConnexion( $aConnexionInfos[ 'connexion' ], $aConnexionInfos[ 'host' ], $aConnexionInfos[ 'login' ], $aConnexionInfos[ 'pass' ], true );
+					$this->_oDB->addDatabase( $aConnexionInfos[ 'connexion' ], $aConnexionInfos[ 'base' ], true );
+				}
+			}
+		}
 		// templates
 		$this->_oTemplate = Templates\Templating::getInstance();
 		// cache
