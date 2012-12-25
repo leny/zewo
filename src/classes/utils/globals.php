@@ -7,6 +7,33 @@ namespace Zewo\Utils;
 
 class Globals extends \Zewo\Tools\Singleton {
 
+	public function has( $sKey, $sTable = 'get' ) {
+		switch( $sTable ) {
+			case 'get':
+				$aTable = $_GET;
+				break;
+			case 'post':
+				$aTable = $_POST;
+				break;
+			case 'session':
+				$aTable = $_SESSION;
+				break;
+			case 'cookie':
+				$aTable = $_COOKIE;
+				break;
+			case 'files':
+				$aTable = $_FILES;
+				break;
+			case 'data':
+				$aTable = $this->_aData;
+				break;
+			default:
+				return false;
+				break;
+		}
+		return isset( $aTable[ $sKey ] );
+	} // hasGet
+
 	public function data( $sKey = null, $mDefault = null ) {
 		return $this->_globals( $sKey, $this->_aData, $mDefault, true );
 	} // data

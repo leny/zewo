@@ -19,7 +19,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 			case 'length':
 			case 'size':
-				return sizeof( $this->_aElements );
+				return empty( $this->_aElements ) ? 0 : sizeof( $this->_aElements );
 				break;
 
 			case 'page':
@@ -54,9 +54,12 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 		}
 	} // __set
 
-	public function __construct( $sTargetClass, $sQuery ) {
-		$this->_sTargetClass = 'namespace\\' . $sTargetClass;
-		if( !$this->_getFromCache( $this->_getCacheKey( $sQuery ) ) )
+	public function __construct( $sTargetClass, $sQuery, $bFromCache = true ) {
+		$this->_sTargetClass = '\\' . $sTargetClass;
+		$this->_bCached = $bFromCache;
+		if( !$this->_bCached )
+			$this->_load( $sQuery );
+		else if( !$this->_getFromCache( $this->_getCacheKey( $sQuery ) ) )
 			$this->_load( $sQuery );
 		return $this;
 	} // __construct
@@ -64,6 +67,12 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 	public function __toString() {
 		return $this->_jsonize();
 	} // __toString
+
+	public function has( $oMember ) {
+		if( !is_a( $oMember, $this->_sTargetClass ) )
+			throw new \InvalidArgumentException( "Search must be a subclass of '" . $this->_sTargetClass . "'' !" );
+		return $this->_has( $oMember );
+	} // has
 
 	public function isEmpty() {
 		return ( $this->size === 0 );
@@ -129,7 +138,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 
 	// -- implements:Iterator
 	public function rewind() { $this->_iPosition = 0; }
-    public function current() { return $this->_getAt( $this->_iPosition, true ); }
+    public function current() { return $this->_getAt( $this->_iPosition ); }
     public function key() { return $this->_iPosition; }
     public function next() { ++$this->_iPosition; }
     public function valid() { return isset( $this->_aElements[ $this->_iPosition ] ); }
@@ -138,7 +147,7 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 	public function offsetSet( $iOffset, $mValue ) { $this->_aElements[ $iOffset ] = $mValue; }
     public function offsetExists( $iOffset ) { return isset( $this->_aElements[ $iOffset ] ); }
     public function offsetUnset( $iOffset ) { unset( $this->_aElements[ $iOffset ] ); }
-    public function offsetGet( $iOffset ) { return $this->_getAt( $iOffset, true ); }
+    public function offsetGet( $iOffset ) { return $this->_getAt( $iOffset ); }
 
     // -- implements:Countable
 	public function count() { return $this->size; }
@@ -146,22 +155,20 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 	protected function _load( $sQuery ) {
 		$this->_sLoadQuery = $sQuery;
 		$this->_aElements = \Zewo\Zewo::getInstance()->db->query( $this->_sLoadQuery );
-		$this->_storeInCache( $this->_getCacheKey( $this->_sLoadQuery ) );
+		if( $this->_bCached )
+	    	$this->_storeInCache( $this->_getCacheKey( $this->_sLoadQuery ) );
     	return $this;
 	} // _load
 
 	protected function _loadAll() {
 		for( $i=0; $i < $this->size; $i++ )
 			$this->_getAt( $i );
-		$this->_storeInCache( $this->_getCacheKey( $this->_sLoadQuery ) );
 		$this->_bAllLoaded = true;
 	} // _loadAll
 
-	protected function _getAt( $iIndex, $bThenStore=false ) {
+	protected function _getAt( $iIndex ) {
 		if( is_array( $this->_aElements[ $iIndex ] ) )
-			$this->_aElements[ $iIndex ] = new $this->_sTargetClass( $this->_aElements[ $iIndex ] );
-		if( $bThenStore )
-			$this->_storeInCache( $this->_getCacheKey( $this->_sLoadQuery ) );
+			$this->_aElements[ $iIndex ] = new $this->_sTargetClass( $this->_convertSearchClauses( $iIndex ), $this->_bCached );
 		return $this->_aElements[ $iIndex ];
 	} // _getAt
 
@@ -175,6 +182,28 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 		if( $bForce || is_null( $this->_aPagesElements ) )
 			$this->_aPagesElements = $this->_aElements;
 	} // _paginate
+
+	protected function _getCacheKey( $sQuery ) {
+		if( is_null( $this->_sCacheKey ) )
+			parent::_getCacheKey( md5( $sQuery ) );
+		return $this->_sCacheKey;
+	} // _getCacheKey
+
+	protected function _convertSearchClauses( $iIndex ) {
+		$aConvertedSearchClauses = array();
+		$oConvertor = \Zewo\Utils\Convertor::getInstance();
+		$oTable = new \Zewo\ORM\Structure\Table( \Zewo\Zewo::getInstance()->db->currentDatabase, $oConvertor->fromClassNameToTableName( $this->_sTargetClass ) );
+		foreach( $this->_aElements[ $iIndex ] as $sColumn=>$mValue )
+			$aConvertedSearchClauses[ $sColumn ] = $oConvertor->fromDB( $mValue, $oTable->getColumn( $sColumn ), true );
+		return $aConvertedSearchClauses;
+	} // _convertSearchClauses
+
+	protected function _has( $oMember ) {
+		for( $i=0; $i < $this->size; $i++ )
+			if( $this->_getAt( $i )->isTheSameAs( $oMember ) )
+				return true;
+		return false;
+	} // _has
 
 	protected $_iPosition = 0;
 
@@ -193,10 +222,6 @@ class Elements extends \Zewo\Tools\Cached implements \Iterator, \Countable, \Arr
 	protected $_iPageSize = 10;
 	protected $_iCurrentPage = 1;
 
-	private function _getCacheKey( $sQuery ) {
-		if( is_null( $this->_sCacheKey ) )
-			$this->_setCacheKey( md5( $sQuery ) );
-		return $this->_sCacheKey;
-	} // _getCacheKey
+	protected $_bCached = true;
 
 } // class::Elements

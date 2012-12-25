@@ -8,11 +8,17 @@ namespace Zewo;
 include( __DIR__ . '/tools/singleton.php' );
 include( __DIR__ . '/tools/cache/cache.php' );
 include( __DIR__ . '/tools/cache/apc.php' );
+include( __DIR__ . '/tools/cache/session.php' );
 include( __DIR__ . '/tools/cached.php' );
 
 include( __DIR__ . '/classes/utils/utils.php' );
 include( __DIR__ . '/classes/utils/convertor.php' );
 include( __DIR__ . '/classes/utils/globals.php' );
+include( __DIR__ . '/classes/utils/void.php' );
+
+include( __DIR__ . '/classes/utils/fs/filesystem.php' );
+include( __DIR__ . '/classes/utils/fs/file.php' );
+include( __DIR__ . '/classes/utils/fs/image.php' );
 
 include( __DIR__ . '/classes/config/config.php' );
 

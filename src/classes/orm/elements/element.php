@@ -17,7 +17,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 			else
 				return isset( $this->_aColumnsData[ $sName ] ) ? $this->_aColumnsData[ $sName ] : null;
 		} elseif( in_array( $sName, array_keys( $this->_aDynamicData ) ) )
-			return $this->_aDynamicData[$sName];
+			return $this->_aDynamicData[ $sName ];
 		else
 			throw new \InvalidArgumentException( 'The property "' . $sName . '" doesn\'t exists in ' . get_called_class() . '.' );
 	} // __get
@@ -28,7 +28,7 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 				if( is_null( $mValue ) ) {
 					if( !$this->_oStructure->getColumn( $sName )->isNullable() )
 						throw new \UnexpectedValueException( 'The property "' . $sName . '" of "' . get_called_class() . '" can\'t be nullable !' );
-					$this->_aColumnsData[$sName] = null;
+					$this->_aColumnsData[ $sName ] = null;
 				} else {
 					$sForeignClassName = \Zewo\Zewo::getInstance()->utils->convertor->fromTableNameToClassName( $this->_oStructure->getColumn( $sName )->foreignTable->table );
 					if( !is_a( $mValue, $sForeignClassName ) ) {
@@ -38,22 +38,25 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 							throw new \UnexpectedValueException( 'The property "' . $sName . '" of "' . get_called_class() . '" must be an instance of "' . $sForeignClassName . '". The convertor has failed to create an instance of "' . $sForeignClassName . '" with given value.' );
 					}
 					if( $mValue->getStructure()->table == $this->_oStructure->getColumn( $sName )->foreignTable->table )
-						$this->_setSubClass($sName, $mValue);
+						$this->_setSubClass( $sName, $mValue );
 				}
 			} elseif( $this->_oStructure->isPrimary( $sName ) )
 				throw new \UnexpectedValueException( 'You can\'t set a new value to "' . $sName . '" : column is a primary key of table "' . $this->_oStructure->table . '" !' );
 			else
-				$this->_aColumnsData[$sName] = $mValue;
+				$this->_aColumnsData[ $sName ] = $mValue;
 		} else
 			$this->_aDynamicData[ $sName ] = $mValue;
 	} // __set
 
-	public function __construct( $sTable, $mQuery ) {
+	public function __construct( $sTable, $mQuery = null, $bFromCache = true ) {
 		$this->_oStructure = new \Zewo\ORM\Structure\Table( \Zewo\Zewo::getInstance()->db->currentDatabase, $sTable );
 		if( is_null( $mQuery ) )
 			return $this->_reset();
 		$this->_mOriginalQuery = $mQuery;
-		if( !$this->_getFromCache( $this->_getCacheKey( $mQuery ) ) )
+		$this->_bCached = $bFromCache;
+		if( !$this->_bCached )
+			$this->_load( $mQuery );
+		else if( !$this->_getFromCache( $this->_getCacheKey( $mQuery ) ) )
 			$this->_load( $mQuery );
 		return $this;
 	} // __construct
@@ -118,11 +121,17 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		return $this->_bNew && empty( $this->_aColumnsData );
 	} // isNull
 
-	public static function get( $sQuery ) {
-		return new \Zewo\ORM\Elements\Elements( get_called_class(), $sQuery );
+	public function isTheSameAs( $oToCompare ) {
+		if( !is_a( $oToCompare, get_called_class() ) )
+			throw new \InvalidArgumentException( "Search must be a subclass of '" . get_called_class() . "'' !" );
+		return $this->_isTheSameAs( $oToCompare );
+	} // isTheSameAs
+
+	public static function get( $sQuery, $bFromCache = true ) {
+		return new \Zewo\ORM\Elements\Elements( get_called_class(), $sQuery, $bFromCache );
 	} // get
 
-	public static function getAll() {
+	public static function getAll( $bFromCache = true ) {
 		// build query
 		$oTable = new \Zewo\ORM\Structure\Table( \Zewo\Zewo::getInstance()->db->currentDatabase, \Zewo\Zewo::getInstance()->utils->convertor->fromClassNameToTableName( get_called_class() ) );
 		$aPrimary = array();
@@ -131,7 +140,8 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 				$aPrimary[] = $oColumn->name;
 		else
 			$aPrimary[] = $oTable->primary->name;
-		return self::get( "SELECT " . implode( ',', $aPrimary ) . " FROM " . $oTable->name );
+		$sClassName = get_called_class();
+		return $sClassName::get( "SELECT " . implode( ',', $aPrimary ) . " FROM " . $oTable->name, $bFromCache );
 	} // getAll
 
 	// - implements:ArrayAccess
@@ -148,8 +158,8 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
     		foreach( $mQuery as $sKey => $mValue ) {
     			$oColumn = $this->_oStructure->getColumn( $sKey );
     			if( $oColumn->isForeign() ) {
-    				if( !is_subclass_of( $mValue, 'Element' ) )
-    					throw new \UnexpectedValueException( $sKey . " must be a subclass of Element !" );
+    				if( !is_subclass_of( $mValue, '\Zewo\ORM\Elements\Element' ) )
+    					throw new \UnexpectedValueException( $sKey . " must be a subclass of \Zewo\ORM\Elements\Element !" );
     				$sForeignProperty = $oColumn->foreignColumn->name;
     				$aSearchClause[] = '`' . $this->_oStructure->table . '`.`' . $sKey."` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $mValue->$sForeignProperty, $oColumn ) . "";
     			} else
@@ -204,7 +214,8 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 					$this->_aColumnsData[ $this->_oStructure->primary->name ] = $mQuery;
     		}
     	}
-    	$this->_storeInCache( $this->_getCacheKey() );
+    	if( $this->_bCached )
+    		$this->_storeInCache( $this->_getCacheKey() );
     	return $this;
     } // _load
 
@@ -225,13 +236,15 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 				$this->_aColumnsData[ $this->_oStructure->primary->name ] = \Zewo\Zewo::getInstance()->db->lastInsertedID;
 			if( $this->_bNew )
 				$this->_bNew = false;
-			$this->_storeInCache( $this->_getCacheKey() );
+			$this->_removeFromCache( $this->_getCacheKey() );
+			if( $this->_bCached )
+	    		$this->_storeInCache( $this->_getCacheKey() );
 		}
     	return $bOperation;
     } // _save
 
     protected function _delete() {
-		$this->_sDeleteQuery = "DELETE FROM `" . $this->_sTable . "` WHERE " . $this->_getWhereClause();
+		$this->_sDeleteQuery = "DELETE FROM `" . $this->_oStructure->table . "` WHERE " . $this->_getWhereClause();
 		$bOperation = \Zewo\Zewo::getInstance()->db->query( $this->_sDeleteQuery );
 		if( $bOperation ) {
 			$this->_removeFromCache( $this->_getCacheKey() );
@@ -253,20 +266,20 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 			foreach( $this->_oStructure->primary as $oColumn ) {
 				$sProperty = $oColumn->name;
 				if( $oColumn->isForeign() ) {
-					$sForeignColumn = $oColumn->foreignColumn;
-					$aWhereClause[] = '`' . $this->_oStructure->table . '`.`' . $sColumn."` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->$sProperty->$sForeignColumn, $oColumn ) . "";
+					$sForeignColumn = $oColumn->foreignColumn->name;
+					$aWhereClause[] = '`' . $this->_oStructure->table . '`.`' . $sProperty . "` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->$sProperty->$sForeignColumn, $oColumn ) . "";
 				} else {
-					$aWhereClause[] = '`' . $this->_oStructure->table . '`.`' . $sColumn."` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->$sProperty, $oColumn ) . "";
+					$aWhereClause[] = '`' . $this->_oStructure->table . '`.`' . $sProperty . "` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->$sProperty, $oColumn ) . "";
 				}
 			}
 			return implode( ' AND ', $aWhereClause ) . " ";
 		} else
-			return $this->_oStructure->primary->name . "` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->_aColumnsData[ $this->_oStructure->primary->name ], $this->_oStructure->primary );
+			return "`" . $this->_oStructure->primary->name . "` = " . \Zewo\Zewo::getInstance()->utils->convertor->toDB( $this->_aColumnsData[ $this->_oStructure->primary->name ], $this->_oStructure->primary );
 	} // _getWhereClause
 
-	protected function _getSubClass( Column $oColumn ) {
+	protected function _getSubClass( \Zewo\ORM\Structure\Column $oColumn ) {
 		if( !$oColumn->isForeign() )
-			throw new \LogicException( 'This should never append : calling internal _getSubClass method for a property not foreigned. Post issue on github, please. Thanks.' );
+			throw new \LogicException( 'This should never append : calling internal _getSubClass method for a property not foreigned. Thanks.' );
 		if( $oColumn->isNullable() && is_null( $this->_aColumnsData[ $oColumn->name ] ) )
 			return null;
 		if( !isset( $this->_aSubClassesData[ $oColumn->name ] ) ) {
@@ -275,6 +288,12 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		}
 		return $this->_aSubClassesData[ $oColumn->name ];
 	} // _getSubClass
+
+	protected function _setSubClass( $sName, $mValue ) {
+		$sForeignColumn = $this->_oStructure->getColumn( $sName )->foreignColumn->name;
+		$this->_aSubClassesData[ $sName ] = $mValue;
+		$this->_aColumnsData[ $sName ] = $mValue->$sForeignColumn;
+	} // _setSubClass
 
 	protected function _hasChanges() {
 		$aValues = $aVerify = array();
@@ -285,27 +304,28 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 		return $aValues !== $aVerify;
 	} // _hasChanges
 
+	protected function _isTheSameAs( $oToCompare ) {
+		if( $this->_oStructure->hasMultiplePrimary() ) {
+			$bCompare = true;
+			foreach( $this->_oStructure->primary as $oPrimaryColumn ) {
+				$sProperty = $oPrimaryColumn->name;
+				$bCompare = $bCompare && ( $this->$sProperty === $oToCompare->$sProperty );
+			}
+		} else {
+			$sProperty = $this->_oStructure->primary->name;
+			return $this->$sProperty === $oToCompare->$sProperty;
+		}
+	} // _isTheSameAs
+
 	protected function _jsonize() {
-		$oExport = new stdClass();
+		$oExport = new \stdClass();
 		foreach( array_keys( $this->_aColumnsData ) as $sProperty )
-			$oExport->$sProperty = ( gettype( $this->$sProperty ) == 'object' && is_a( $this->$sProperty, 'Element' ) ) ? json_decode( $this->$sProperty->toJSON() ) : $this->$sProperty;
+			$oExport->$sProperty = ( gettype( $this->$sProperty ) == 'object' && is_a( $this->$sProperty, '\Zewo\ORM\Elements\Element' ) ) ? json_decode( $this->$sProperty->toJSON() ) : $this->$sProperty;
 		return json_encode( $oExport );
 	} // _jsonize
 
-	protected $_oStructure;
-
-	protected $_bNew = true;
-
-	protected $_aColumnsData = array();
-	protected $_aDynamicData = array();
-	protected $_aSubClassesData = array();
-
-	protected $_sCacheKey;
-
-	protected $_mOriginalQuery;
-
-	private function _getCacheKey( $mParams = null ) {
-		if( !is_null( $this->_sCacheKey ) ) {
+	protected function _getCacheKey( $mParams = null ) {
+		if( is_null( $this->_sCacheKey ) ) {
 			if( is_null( $mParams ) ) {
 				if( $this->_oStructure->hasMultiplePrimary() ) {
 					$mParams = array();
@@ -315,10 +335,23 @@ abstract class Element extends \Zewo\Tools\Cached implements \ArrayAccess {
 					$mParams = $this->_aColumnsData[ $this->_oStructure->primary->name ];
 			}
 			$sCacheKey = is_array( $mParams ) ? http_build_query( $mParams ) : strval( $mParams );
-			$this->_setCacheKey( $sCacheKey );
+			parent::_getCacheKey( $sCacheKey );
 		}
 		return $this->_sCacheKey;
 	} // _getCacheKey
+
+	protected $_bNew = true;
+	protected $_bCached = true;
+
+	protected $_aColumnsData = array();
+	protected $_aDynamicData = array();
+	protected $_aSubClassesData = array();
+
+	protected $_sCacheKey;
+
+	protected $_mOriginalQuery;
+
+	protected $_oStructure;
 
 	private $_sLoadQuery;
 	private $_sSaveQuery;
