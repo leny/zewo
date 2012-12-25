@@ -16,8 +16,21 @@ class Config extends \Zewo\Tools\Singleton {
 		return $aCurrent;
 	} // get
 
+	public function set( $sConfigPath, $mValue ) {
+		$aCurrent = &$this->_aData;
+		foreach( explode( '.', $sConfigPath ) as $sConfigPathPart )
+			$aCurrent = &$aCurrent[ $sConfigPathPart ];
+		$aCurrent = $mValue;
+	} // set
+
 	public function apply( $aConfig, $sPathBase = null ) {
-		$this->_aData = array_merge( $this->_aDefault, $aConfig );
+		$this->_aDefault[ 'path' ][ 'url' ] = 'http://' . $_SERVER[ 'HTTP_HOST' ] . '/';
+		foreach( $this->_aDefault as $sSection => $aParameters ) {
+			if( $sSection === 'db' && is_array( $aConfig[ $sSection ] ) ) {
+				$this->_aData[ $sSection ] = $aConfig[ $sSection ];
+			} else
+				$this->_aData[ $sSection ] = isset( $aConfig[ $sSection ] ) ? array_merge( $this->_aDefault[ $sSection ], $aConfig[ $sSection ] ) : $this->_aDefault[ $sSection ];
+		}
 		if( !is_null( $sPathBase ) ) {
 			$this->_aData[ 'template' ][ 'folders' ][ 'cache' ] = $sPathBase . $this->_aData[ 'template' ][ 'folders' ][ 'cache' ];
 			$this->_aData[ 'template' ][ 'folders' ][ 'templates' ] = $sPathBase . $this->_aData[ 'template' ][ 'folders' ][ 'templates' ];
@@ -42,6 +55,11 @@ class Config extends \Zewo\Tools\Singleton {
 		'orm' => array(
 			'cacheKey' => 'noCacheKey',
 			'baseClass' => '\Zewo\Extendeds\Elements\Element',
+		),
+		// PATH
+		'path' => array(
+			'url' => null,
+			'files' => 'files/'
 		),
 		// TEMPLATES
 		'template' => array(

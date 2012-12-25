@@ -7,6 +7,12 @@ namespace Zewo\Templates;
 
 class Templating extends \Zewo\Tools\Singleton {
 
+	public function clearCache() {
+		$aCachedFiles = glob( $this->_oZewo->config->get( 'template.folders.cache' ) . '*.t*c' );
+		foreach( $aCachedFiles as $sFile)
+			unlink( $sFile );
+	} // clearCache
+
 	public function assign( $sName, $mValue ) {
 		$this->_aAssignedVariables[ $sName ] = $mValue;
 	} // assign
@@ -18,6 +24,10 @@ class Templating extends \Zewo\Tools\Singleton {
 	public function getAssignedVariable( $sName ) {
 		return isset( $this->_aAssignedVariables[ $sName ] ) ? $this->_aAssignedVariables[ $sName ] : null ;
 	} // getAssignedVariable
+
+	public function fetchTo( $sName, $sTPLPath, $sCacheID = null ) {
+		$this->assign( $sName, $this->fetch( $sTPLPath, $sCacheID ) );
+	} // fetchTo
 
 	public function fetch( $sTPLPath, $sCacheID = null ) {
 		$sTemplateFilePath = $this->_getTemplateFile( $sTPLPath, $sCacheID );
@@ -56,8 +66,11 @@ class Templating extends \Zewo\Tools\Singleton {
 
 	private function _generateAssignedVars() {
 		$sCode  = '<?php ' . "\n";
+		$sCode .= '		$zewo = \Zewo\Zewo::getInstance();' . "\n";
+		$sCode .= '		defined( "LDELIM" ) ?: define( "LDELIM", "{" );' . "\n";
+		$sCode .= '		defined( "RDELIM" ) ?: define( "RDELIM", "}" );' . "\n";
 		foreach( $this->_aAssignedVariables as $sName => $mValue )
-			$sCode .= '		$' . $sName . ' = \Zewo\Templates\Templating::getInstance()->getAssignedVariable( \'' . $sName . '\' );' . "\n";
+			$sCode .= '		$' . $sName . ' = $zewo->tpl->getAssignedVariable( \'' . $sName . '\' );' . "\n";
 		$sCode .= '?>' . "\n";
 		return $sCode;
 	} // _generateAssignedVars

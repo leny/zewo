@@ -51,7 +51,7 @@ class db extends \Zewo\Tools\Singleton {
 	} // __set
 
 	public function addConnexion( $sName, $sHost, $sLogin, $sPass, $bSelect=false ) {
-		$rConnexion = mysqli_connect($sHost, $sLogin, $sPass);
+		$rConnexion = mysqli_connect( $sHost, $sLogin, $sPass );
 		if( !$rConnexion )
 			throw new \InvalidArgumentException( 'MySQL Connexion Error (' . mysqli_connect_errno() . ' : ' . mysqli_connect_error() . ')' );
 		if( isset( $this->_aConnexions[ $sName ] ) )
@@ -135,7 +135,7 @@ class db extends \Zewo\Tools\Singleton {
 		}
 		if( gettype( $mData ) == 'boolean' ) {
 			if( mysqli_errno( $this->currentConnexion ) )
-				throw new \Exception( $this->_getErrorMessage() );
+				throw new \Exception( $this->_getErrorMessage( $sQuery ) );
 			return true;
 		}
 		$aArray = array();
@@ -165,8 +165,8 @@ class db extends \Zewo\Tools\Singleton {
 		$this->_aQueries[] = $aStats;
 	} // _logQuery
 
-	protected function _getErrorMessage() {
-		return 'MySQL Error (' . mysqli_errno( $this->currentConnexion ) . ' : ' . mysqli_error( $this->currentConnexion ) . ')';
+	protected function _getErrorMessage( $sQuery ) {
+		return 'MySQL Error (' . mysqli_errno( $this->currentConnexion ) . ' : ' . mysqli_error( $this->currentConnexion ) . ') for query ' . $sQuery;
 	} // _getErrorMessage
 
 	// --- private members

@@ -7,15 +7,19 @@ namespace Zewo\Utils;
 
 class Convertor extends \Zewo\Tools\Singleton {
 
-	public function fromDB( $mValue, \Zewo\ORM\Structure\Column $oColumn ) {
+	public function fromDB( $mValue, \Zewo\ORM\Structure\Column $oColumn, $bReturnClass = false ) {
 		if( ( is_null( $mValue ) || empty( $mValue ) ) && $oColumn->isNullable() )
 			return null;
+		if( $bReturnClass && $oColumn->isForeign() ) {
+			$sClassName = $this->fromTableNameToClassName( $oColumn->foreignTable->table );
+			return new $sClassName( array( $oColumn->foreignColumn->name => $mValue ) );
+		}
 		switch( $oColumn->type ) {
 			case 'date':
 			case 'datetime':
 			case 'time':
 			case 'timestamp':
-				return new DateTime( $mValue );
+				return new \DateTime( $mValue );
 				break;
 
 			case 'float':
@@ -68,7 +72,7 @@ class Convertor extends \Zewo\Tools\Singleton {
 			case 'mediumint':
 			case 'bigint':
 			case 'int':
-				$iNewValue = !$oColumn->isSigned() ? intval($mValue) : abs(intval($mValue));
+				$iNewValue = !$oColumn->isSigned() ? intval( $mValue ) : abs( intval( $mValue ) );
 				return $iNewValue;
 				break;
 
@@ -87,7 +91,7 @@ class Convertor extends \Zewo\Tools\Singleton {
 				if( in_array( $mValue, $oColumn->possibleValues ) )
 					return "'" . addslashes( $this->encode( strval( $mValue ) ) ) . "'";
 				else {
-					trigger_error('The value "' . $mValue . '" is not an allowed value for the ' . $oColumn->table . '.' . $oColumn->name . ' enum column !', E_USER_WARNING);
+					trigger_error( 'The value "' . $mValue . '" is not an allowed value for the ' . $oColumn->table . '.' . $oColumn->name . ' enum column !', E_USER_WARNING );
 				}
 				break;
 
@@ -98,7 +102,7 @@ class Convertor extends \Zewo\Tools\Singleton {
 	} // toDB
 
 	public function fromClassNameToTableName( $sClassName ) {
-		return strtolower( preg_replace( '~(?<=\\w)([A-Z])~', '_$1', $sClassName ) );
+		return strtolower( str_replace( '\\', '', preg_replace( '~(?<=\\w)([A-Z])~', '_$1', $sClassName ) ) );
 	} // fromClassNameToDBName
 
 	public function fromTableNameToClassName( $sTableName ) {
@@ -106,17 +110,17 @@ class Convertor extends \Zewo\Tools\Singleton {
 	} // fromTableNameToClassName
 
 	public function encode( $sStr = null ) {
-		return htmlentities($sStr, ENT_QUOTES, 'utf-8');
+		return htmlentities( $sStr, ENT_QUOTES, 'utf-8' );
 	} // encode
 
 	public function decode( $sStr = null ) {
-		return html_entity_decode($sStr, ENT_QUOTES, 'utf-8');
+		return html_entity_decode( $sStr, ENT_QUOTES, 'utf-8' );
 	} // decode
 
 	public function unencode( $sStr = '' ) {
 		$aEntities = array('&aacute;','&agrave;','&acirc;','&auml;','&eacute;','&egrave;','&ecirc;','&euml;','&iacute;','&igrave;','&icirc;','&iuml;','&oacute;','&ograve;','&ocirc;','&ouml;','&uacute;','&ugrave;','&ucirc;','&uuml;','&yacute;','&ygrave;','&ycirc;','&yuml;',);
 		$aNoEntities = array('a','a','a','a','e','e','e','e','i','i','i','i','o','o','o','o','u','u','u','u','y','y','y','y',);
-		return str_replace($aEntities, $aNoEntities, $sStr);
+		return str_replace( $aEntities, $aNoEntities, $sStr );
 	} // unencode
 
 	public function no_accent( $sStr = '' ) {

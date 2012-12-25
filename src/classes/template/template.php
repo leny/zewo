@@ -47,8 +47,7 @@ class Template {
 
 	private function _generateOpcode() {
 		self::$_aCompiledTemplates[] = $this->_sCacheName;
-		$this->_sOpCodeContent  = '<?php /* ZEWO Opcode Template : ' . $this->_sCacheName . ' */ ?>' . "\n";
-		$this->_sOpCodeContent .= file_get_contents( $this->_sTPLPath );
+		$this->_sOpCodeContent = file_get_contents( $this->_sTPLPath );
 
 		// parse includes
 		$this->_sOpCodeContent = $this->_replaceIncludes( $this->_sOpCodeContent );
@@ -60,13 +59,31 @@ class Template {
 		// inline elements
 		$this->_replaceExpressions();
 
-		file_put_contents( $this->_sOpCodePath, $this->_sOpCodeContent );
+		$sGeneratedContent  = '<?php /* ZEWO Opcode Template : ' . $this->_sCacheName . ' */ ?>' . "\n";
+		$sGeneratedContent .= $this->_generatingVarsDeclarations();
+		$sGeneratedContent .= $this->_sOpCodeContent;
+
+		file_put_contents( $this->_sOpCodePath, $sGeneratedContent );
 	} // _generateOpcode
 
 	private function _initOpcode( $sOpcodeID ) {
 		$this->_sOpCodeContent  = '<?php /* ZEWO Opcode Template : ' . $sOpcodeID . ' */ ?>' . "\n";
 		$this->_sOpCodeContent .= $this->_sTemplateSource;
 	} // _initOpcode
+
+	private function _generatingVarsDeclarations() {
+		$sCode  = '<?php ' . "\n";
+		foreach( $this->_aEncounteredVars as $sVarName ) {
+			if( isset( $this->_aEncounteredObject[ $sVarName ] ) )
+				$sCode .= "\t" . '' . $sVarName . ' = isset( ' . $sVarName . ' ) ? ' . $sVarName . ' : new \Zewo\Utils\Void();' . "\n";
+			else
+				$sCode .= "\t" . '' . $sVarName . ' = isset( ' . $sVarName . ' ) ? ' . $sVarName . ' : null;' . "\n";
+		}
+		foreach( $this->_aEncounteredConstants as $sConstantName )
+			$sCode .= "\t" . 'defined( "' . $sConstantName . '" ) ?: define( "' . $sConstantName . '", null );' . "\n";
+		$sCode .= '?>' . "\n";
+		return $sCode;
+	} // _generatingVarsDeclarations
 
 	private function _replaceIncludes( $sSource ) {
 		return preg_replace_callback( $this->_sIncludeBlockRegex, array( $this, '_parseIncludeBlock' ), $sSource );
@@ -122,14 +139,16 @@ class Template {
 	} // _parseExpressionBlock
 
 	private function _parseExpression( $sExpression ) {
-		$sExpressionAfter = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1 );
-		if( $sExpression == $sExpressionAfter )
+		$sExpression = str_replace( array( '||', '&&' ) , array( ' or ', ' and ' ), $sExpression, $iCount );
+		$sExpressionAfter = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $sExpression, 1, $iCount );
+		if( $sExpression == $sExpressionAfter && $iCount == 0 )
 			$sExpressionAfter = $this->_parseExpressionPart( $sExpressionAfter );
+		if( $iCount > 0 )
+			$sExpressionAfter = str_replace( array( ' or ', ' and ' ), array( ' || ', ' && ' ), $sExpressionAfter );
 		return $sExpressionAfter;
 	} // _parseExpression
 
 	private function _parseExpressionParts( $aMatches ) {
-
 		$sExpression  = preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 1 ] ) ) );
 		$sExpression .= ' ' . trim( $aMatches[ 2 ] ) . ' ';
 		$sExpression .= preg_replace_callback( $this->_aExpressionSplitRegexes, array( $this, '_parseExpressionParts' ), $this->_parseExpressionPart( trim( $aMatches[ 3 ] ) ) );
@@ -154,12 +173,14 @@ class Template {
 	private function _parseVar( $sVarName ) {
 		$aVarComponents = preg_split( '/(\.|\-\>|\[.+\])/', $sVarName, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
 		$sVarName = '';
+		$this->_registerVar( $aVarComponents[ 0 ] );
 		for( $i = -1, $l = sizeof( $aVarComponents ); ++$i < $l; ) {
 			if( $aVarComponents[ $i ] == '.' )
 				$sVarName .= "[ '" . $aVarComponents[ ++$i ] . "' ]";
-			elseif( $aVarComponents[ $i ] == '->' )
+			elseif( $aVarComponents[ $i ] == '->' ) {
+				$this->_aEncounteredObject[ $aVarComponents[ 0 ] ] = true;
 				$sVarName .= "->" . $aVarComponents[ ++$i ];
-			else
+			} else
 				$sVarName .= $aVarComponents[ $i ];
 		}
 		return $sVarName;
@@ -173,6 +194,25 @@ class Template {
 		}
 		return $sVarName;
 	} // _applyFunctionToVarExpression
+
+	private function _registerVar( $sVarName ) {
+		if( ( $sVarName{0} == "'" && substr( $sVarName, -1 ) == "'" ) || ( $sVarName{0} == '"' && substr( $sVarName, -1 ) == '"' ) )
+			return;
+		if( $sVarName{ 0 } == '$' ) {
+			if( stripos( $sVarName, ' or ' ) !== false || stripos( $sVarName, ' and ' ) !== false )
+				return;
+			if( !is_null( preg_filter( $this->_aExpressionSplitRegexes, 'BUSTED', $sVarName ) ) )
+				return;
+			if( !in_array( $sVarName , $this->_aEncounteredVars ) )
+				$this->_aEncounteredVars[] = $sVarName;
+		} elseif( $sVarName{ 0 } == '!' && $sVarName{ 1 } == '$' ) {
+			if( !in_array( substr( $sVarName, 1 ) , $this->_aEncounteredVars ) )
+				$this->_aEncounteredVars[] = substr( $sVarName, 1 );
+		} else {
+			if( ( $sVarName == strtoupper( $sVarName ) ) && !in_array( $sVarName , $this->_aEncounteredConstants ) && !is_numeric( $sVarName ) )
+				$this->_aEncounteredConstants[] = $sVarName;
+		}
+	} // _registerVar
 
 	private function _replaceIfs() {
 		$this->_sOpCodeContent = preg_replace_callback( $this->_sIfBlocksOpenRegex, array( $this, '_parseIfBlockOpen' ), $this->_sOpCodeContent );
@@ -189,7 +229,6 @@ class Template {
 	} // _replaceForeachs
 
 	private function _parseForeachBlock( $aMatches ) {
-		// $this->_oZewo->utils->trace( $aMatches );
 		$sCode = '';
 		// parse parameters
 		$aParameters = array(
@@ -205,7 +244,7 @@ class Template {
 		// has foreachelse ?
 		if( isset( $aMatches[ 3 ] ) && strpos( $aMatches[ 3 ], '{foreachelse}' ) !== false )
 			$sCode .= '<?php if( !isset( ' . $aParameters[ 'from' ] . ' ) || sizeof( ' . $aParameters[ 'from' ] . ' ) === 0 ): ?>' . "\n";
-		$sCode .= '<?php $' . $aParameters[ 'name' ] . '_index = 0; foreach( ' . $aParameters[ 'from' ] . ' as $' . $aParameters[ 'key' ] . ' => &$' . $aParameters[ 'item' ] . ' ): ' . "\n";
+			$sCode .= '<?php $' . $aParameters[ 'name' ] . '_index = 0; foreach( ' . $aParameters[ 'from' ] . ' as $' . $aParameters[ 'key' ] . ' => $' . $aParameters[ 'item' ] . ' ): ' . "\n";
 			$sCode .= "\t" . '$' . $aParameters[ 'name' ] . ' = array(' . "\n";
 			$sCode .= "\t\t" . '"index" => $' . $aParameters[ 'name' ] . '_index,' . "\n";
 			$sCode .= "\t\t" . '"iteration" => $' . $aParameters[ 'name' ] . '_index + 1,' . "\n";
@@ -240,6 +279,10 @@ class Template {
 
 	private $_oZewo;
 
+	private $_aEncounteredVars = array();
+	private $_aEncounteredObject = array();
+	private $_aEncounteredConstants = array();
+
 	private static $_aCompiledTemplates = array();
 
 	// regexes
@@ -249,6 +292,7 @@ class Template {
 		// expression
 	private $_sExpressionBlockRegex = '/\{([^\}]+)\}/';
 	private $_aExpressionSplitRegexes = array(
+		'/(.+)\s(and|or)(.+)/',
 		'/(.+)\s(<>|!=+|==+)(.+)/',
 		'/(.+)([^-][<>]=?)(.+)/',
 		'/(.+)(\+|-[^\>]|\*|\/|%)(.+)/',

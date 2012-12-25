@@ -1,19 +1,23 @@
 <?php
 /** flatLand! : zewo
- * /classes/extendeds/elements/element.php
+ * /classes/extendeds/elements/elements.php
  */
 
 namespace Zewo\Extendeds\Elements;
 
-abstract class Elements extends \Zewo\ORM\Elements\Elements {
+class Elements extends \Zewo\ORM\Elements\Elements {
 
-	public function __construct( $sTargetClass, $sQuery ) {
-		return parent::__construct( $sTargetClass, $sQuery );
+	public function __construct( $sTargetClass, $sQuery, $bFromCache = true ) {
+		return parent::__construct( $sTargetClass, $sQuery, $bFromCache );
 	} // __construct
 
 	public function assign( $sName ) {
 		\Zewo\Zewo::getInstance()->tpl->assignByRef( $sName, $this );
 		return $this;
 	} // assign
+
+	public function trace() {
+		\Zewo\Zewo::getInstance()->utils->trace( $this );
+	} // trace
 
 } // class::Elements

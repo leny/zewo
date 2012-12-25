@@ -37,11 +37,30 @@ class Utils extends \Zewo\Tools\Singleton {
 		echo '</div>';
 	} // trace
 
-	public function load( $mPaths ) {
-		$aFiles = ( is_array( $mPaths ) && sizeof( $mPaths ) ) ? $mPaths : glob( $mPaths );
-		foreach( $aFiles as $sFilePath )
-			include( $sFilePath );
-	} // load
+	// log: usefull for cli
+	public function log( $mToLog, $bDump = false ) {
+		if( $bDump )
+			var_dump( $mToLog );
+		else
+			echo $mToLog;
+		echo "\n";
+	} // log
+
+	public function load( $mPaths, $aOrderPaths = array() ) {
+        $aFiles = ( is_array( $mPaths ) && sizeof( $mPaths ) ) ? $mPaths : glob( $mPaths );
+        if( sizeof( $aOrderPaths ) ) {
+            foreach( $aOrderPaths as $sOrderedPath ) {
+                $iIndex = array_search( $sOrderedPath, $aFiles );
+                if( $iIndex !== false ) {
+                    include( $sOrderedPath );
+                    unset( $aFiles[ $iIndex ] );
+                }
+            }
+        }
+        if( sizeof( $aFiles ) )
+            foreach( $aFiles as $sFilePath )
+                include( $sFilePath );
+    } // load
 
 	public function genUID() {
 		return substr( md5( uniqid() ), 0, 8 );
@@ -118,6 +137,15 @@ class Utils extends \Zewo\Tools\Singleton {
 			$iComputedSize += folder_size( $sFilePath );
 		return $iComputedSize;
 	} // folder_size
+
+	function array_keys_exists( $aNeedle, $aHaystack ) {
+		if( !is_array( $aHaystack ) )
+			return false;
+		foreach( $aNeedle as $sKey )
+			if( !array_key_exists( $sKey, $aHaystack ) )
+				return false;
+		return true;
+	} // array_has_keys
 
 
 } // class::Utils
