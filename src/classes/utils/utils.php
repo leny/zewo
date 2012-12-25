@@ -46,11 +46,21 @@ class Utils extends \Zewo\Tools\Singleton {
 		echo "\n";
 	} // log
 
-	public function load( $mPaths ) {
-		$aFiles = ( is_array( $mPaths ) && sizeof( $mPaths ) ) ? $mPaths : glob( $mPaths );
-		foreach( $aFiles as $sFilePath )
-			include( $sFilePath );
-	} // load
+	public function load( $mPaths, $aOrderPaths = array() ) {
+        $aFiles = ( is_array( $mPaths ) && sizeof( $mPaths ) ) ? $mPaths : glob( $mPaths );
+        if( sizeof( $aOrderPaths ) ) {
+            foreach( $aOrderPaths as $sOrderedPath ) {
+                $iIndex = array_search( $sOrderedPath, $aFiles );
+                if( $iIndex !== false ) {
+                    include( $sOrderedPath );
+                    unset( $aFiles[ $iIndex ] );
+                }
+            }
+        }
+        if( sizeof( $aFiles ) )
+            foreach( $aFiles as $sFilePath )
+                include( $sFilePath );
+    } // load
 
 	public function genUID() {
 		return substr( md5( uniqid() ), 0, 8 );
